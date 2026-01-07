@@ -1,0 +1,514 @@
+
+import React, { useState, useRef, useEffect } from 'react';
+import Button from './Button';
+import { AthplanLogo, BotIcon, MessageCircleIcon, SmartphoneIcon, ZapIcon, CheckIcon, XIcon, ArrowRightIcon } from './icons/Icons';
+import { User } from '../lib/mockBackend';
+
+interface DashboardProps {
+  user: User;
+  onLogout: () => void;
+}
+
+type Tab = 'overview' | 'inbox' | 'team' | 'settings';
+type SetupMode = 'undecided' | 'demo' | 'blank';
+
+interface ActivityLog {
+  id: number;
+  time: string;
+  user: string;
+  query: string;
+  status: string;
+}
+
+// Initial Demo Data
+const DEMO_LOGS: ActivityLog[] = [
+  { id: 1, time: '2m ago', user: 'Mike J.', query: 'Bus departure time?', status: 'Answered' },
+  { id: 2, time: '15m ago', user: 'Sarah T.', query: 'What is the dress code for dinner?', status: 'Answered' },
+  { id: 3, time: '1h ago', user: 'Tom B.', query: 'Gym location', status: 'Answered' },
+  { id: 4, time: '2h ago', user: 'System', query: 'Syncing Flight AA123...', status: 'Processed' },
+];
+
+const InfoTip: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+  <div className="bg-indigo-900/20 border border-indigo-500/30 rounded-lg p-3 mb-4 flex gap-3 items-start animate-fade-in">
+    <div className="bg-indigo-500/20 p-1 rounded-full shrink-0 mt-0.5">
+      <svg className="w-4 h-4 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </div>
+    <div>
+      <h4 className="text-indigo-200 font-semibold text-sm mb-1">{title}</h4>
+      <p className="text-indigo-100/70 text-xs leading-relaxed">{children}</p>
+    </div>
+  </div>
+);
+
+const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const [setupMode, setSetupMode] = useState<SetupMode>('undecided');
+  
+  // State
+  const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
+  const [stats, setStats] = useState({ queries: 0, activePlayers: 0, timeSaved: 0 });
+
+  // File Upload State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadFileName, setUploadFileName] = useState('');
+  const [isDragActive, setIsDragActive] = useState(false);
+
+  // Broadcast Message State
+  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [isSendingBroadcast, setIsSendingBroadcast] = useState(false);
+
+  // Initialize Data based on mode
+  useEffect(() => {
+    if (setupMode === 'demo') {
+      setActivityLog(DEMO_LOGS);
+      setStats({ queries: 24, activePlayers: 18, timeSaved: 1.5 });
+    } else if (setupMode === 'blank') {
+      setActivityLog([]);
+      setStats({ queries: 0, activePlayers: 0, timeSaved: 0 });
+    }
+  }, [setupMode]);
+
+  const navItems = [
+    { id: 'overview', label: 'Overview', icon: BotIcon },
+    { id: 'inbox', label: 'Inbox', icon: MessageCircleIcon },
+    { id: 'team', label: 'Team Roster', icon: SmartphoneIcon },
+    { id: 'settings', label: 'Settings', icon: ZapIcon },
+  ];
+
+  // --- Handlers ---
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setUploadFileName(file.name);
+      simulateUpload(file.name);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      setUploadFileName(file.name);
+      simulateUpload(file.name);
+    }
+  };
+
+  const simulateUpload = (fileName: string) => {
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    const interval = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          finishUpload(fileName);
+          return 100;
+        }
+        return prev + 15;
+      });
+    }, 200);
+  };
+
+  const finishUpload = (fileName: string) => {
+    setTimeout(() => {
+      setIsUploading(false);
+      setUploadProgress(0);
+      setUploadFileName('');
+      
+      // Update stats for effect
+      setStats(prev => ({ ...prev, queries: prev.queries + 1, timeSaved: prev.timeSaved + 0.1 }));
+
+      // Add to log
+      const newLog: ActivityLog = {
+        id: Date.now(),
+        time: 'Just now',
+        user: 'System',
+        query: `Knowledge Base Updated: "${fileName}"`,
+        status: 'Processed'
+      };
+      setActivityLog(prev => [newLog, ...prev]);
+    }, 500);
+  };
+
+  const handleBroadcastSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!broadcastMessage.trim()) return;
+
+    setIsSendingBroadcast(true);
+
+    setTimeout(() => {
+      const newLog: ActivityLog = {
+        id: Date.now(),
+        time: 'Just now',
+        user: 'Admin',
+        query: `Broadcast sent to ${stats.activePlayers || '0'} players: "${broadcastMessage.substring(0, 20)}..."`,
+        status: 'Sent'
+      };
+      setActivityLog(prev => [newLog, ...prev]);
+      
+      setIsSendingBroadcast(false);
+      setBroadcastMessage('');
+      setShowBroadcastModal(false);
+    }, 1500);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row relative overflow-hidden">
+      
+      {/* --- ONBOARDING MODAL --- */}
+      {setupMode === 'undecided' && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+          <div className="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl animate-fade-in-up">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">Welcome to your Trial! 🚀</h2>
+              <p className="text-slate-400">How would you like to start exploring Athplan?</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Option 1: Demo */}
+              <button 
+                onClick={() => setSetupMode('demo')}
+                className="group p-6 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-indigo-500 hover:bg-slate-800 transition-all text-left"
+              >
+                <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition-transform">
+                  <ZapIcon className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Explore Demo Mode</h3>
+                <p className="text-sm text-slate-400">
+                  Pre-populated with example players and schedules. Best for understanding how the features work together.
+                </p>
+              </button>
+
+              {/* Option 2: Blank */}
+              <button 
+                onClick={() => setSetupMode('blank')}
+                className="group p-6 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-green-500 hover:bg-slate-800 transition-all text-left"
+              >
+                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center text-green-400 mb-4 group-hover:scale-110 transition-transform">
+                  <BotIcon className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Start From Scratch</h3>
+                <p className="text-sm text-slate-400">
+                  Empty dashboard. Ready for you to upload your real schedule and invite your actual team members.
+                </p>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Broadcast Modal Overlay */}
+      {showBroadcastModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl transform scale-100 transition-all">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-white">Broadcast Message</h3>
+              <button onClick={() => setShowBroadcastModal(false)} className="text-slate-400 hover:text-white">
+                <XIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleBroadcastSend}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Message to {stats.activePlayers > 0 ? stats.activePlayers : '0'} Active Players
+                </label>
+                <textarea 
+                  value={broadcastMessage}
+                  onChange={(e) => setBroadcastMessage(e.target.value)}
+                  className="w-full h-32 bg-slate-950 border border-slate-800 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  placeholder="e.g. Bus is leaving in 15 minutes. Please meet in the lobby."
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => setShowBroadcastModal(false)}>Cancel</Button>
+                <Button type="submit" disabled={isSendingBroadcast}>
+                  {isSendingBroadcast ? 'Sending...' : 'Send Broadcast'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Sidebar */}
+      <aside className="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
+        <div className="p-6 flex items-center gap-3 border-b border-slate-800">
+          <AthplanLogo className="w-8 h-8" />
+          <span className="font-bold text-lg text-white">Athplan</span>
+        </div>
+        
+        <nav className="flex-1 p-4 space-y-1">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id as Tab)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === item.id
+                  ? 'bg-indigo-500/10 text-indigo-400'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <item.icon className="w-5 h-5" />
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {setupMode === 'demo' && (
+          <div className="px-4 pb-4">
+            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+              <p className="text-xs text-slate-400 mb-2">You are viewing Demo Data.</p>
+              <button 
+                onClick={() => setSetupMode('blank')}
+                className="w-full py-2 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded transition-colors"
+              >
+                Start Real Setup
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="p-4 border-t border-slate-800">
+          <div className="flex items-center gap-3 mb-4 px-2">
+            <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">
+              {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <div className="text-sm font-medium text-white truncate">{user.firstName} {user.lastName}</div>
+              <div className="text-xs text-slate-500 truncate">{user.team}</div>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="w-full text-xs" onClick={onLogout}>
+            Sign Out
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto h-screen relative">
+        <header className="bg-slate-950 border-b border-slate-800 py-6 px-8 flex justify-between items-center sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md">
+          <div>
+            <h1 className="text-2xl font-bold text-white capitalize">{activeTab}</h1>
+            <div className="flex items-center gap-2 mt-1">
+               <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-xs border border-indigo-500/30">14 Days Left in Trial</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+             {/* Crisis Mode Button */}
+             <button className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold rounded-full hover:bg-red-500/20 transition-colors" onClick={() => alert("Crisis Mode Activated: All players would receive an emergency push notification now.")}>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                CRISIS MODE
+             </button>
+
+             <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span className="text-xs font-medium text-green-500">System Operational</span>
+             </div>
+             
+             {/* Header Sign Out Button (Visible on mobile/all) */}
+             <button 
+                onClick={onLogout}
+                className="md:hidden text-slate-400 hover:text-white text-sm font-medium"
+             >
+                Sign Out
+             </button>
+          </div>
+        </header>
+
+        <div className="p-8 max-w-6xl mx-auto space-y-8">
+          
+          {/* Overview Tab Content */}
+          {activeTab === 'overview' && (
+            <>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                  <div className="text-slate-400 text-sm font-medium mb-2">Queries Today</div>
+                  <div className="text-3xl font-bold text-white">{stats.queries}</div>
+                  {setupMode === 'demo' && <div className="mt-2 text-xs text-green-400">↑ 12% vs yesterday</div>}
+                </div>
+                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                  <div className="text-slate-400 text-sm font-medium mb-2">Active Players</div>
+                  <div className="text-3xl font-bold text-white">{stats.activePlayers}</div>
+                  {setupMode === 'demo' && <div className="mt-2 text-xs text-slate-500">Out of 23 rostered</div>}
+                </div>
+                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                  <div className="text-slate-400 text-sm font-medium mb-2">Time Saved</div>
+                  <div className="text-3xl font-bold text-white">{stats.timeSaved.toFixed(1)} hrs</div>
+                  {setupMode === 'demo' && <div className="mt-2 text-xs text-indigo-400">This week so far</div>}
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Upload Action */}
+                <div className="bg-gradient-to-br from-indigo-900/50 to-slate-900 border border-indigo-500/30 p-6 rounded-2xl relative overflow-hidden flex flex-col">
+                  {setupMode === 'demo' && (
+                    <InfoTip title="Feed the Brain">
+                      Upload your PDF/Excel itinerary here. The AI reads it to answer player questions automatically.
+                    </InfoTip>
+                  )}
+                  
+                  <div className="relative z-10 flex-1">
+                    <h3 className="font-bold text-white mb-2">Upload Schedule</h3>
+                    <p className="text-sm text-slate-400 mb-6">
+                      Drag and drop your PDF itinerary here to update the bot's knowledge base.
+                    </p>
+                    
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleFileSelect} 
+                      className="hidden" 
+                      accept=".pdf,.csv,.xlsx"
+                    />
+                    
+                    {isUploading ? (
+                      <div className="w-full bg-slate-800 rounded-full h-2.5 mb-2 mt-auto">
+                        <div className="bg-indigo-500 h-2.5 rounded-full transition-all duration-200" style={{ width: `${uploadProgress}%` }}></div>
+                        <p className="text-xs text-indigo-300 mt-2 text-center">Uploading {uploadFileName} ({uploadProgress}%)...</p>
+                      </div>
+                    ) : (
+                      <div 
+                        onClick={() => fileInputRef.current?.click()}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={`border-2 border-dashed rounded-xl h-32 flex flex-col items-center justify-center cursor-pointer transition-all group ${
+                          isDragActive 
+                            ? 'border-indigo-500 bg-indigo-500/10' 
+                            : 'border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/5'
+                        }`}
+                      >
+                        <div className={`p-3 rounded-full mb-2 transition-transform ${isDragActive ? 'bg-indigo-500/20 scale-110' : 'bg-slate-800 group-hover:scale-110'}`}>
+                           <ZapIcon className={`w-5 h-5 ${isDragActive ? 'text-indigo-400' : 'text-indigo-400'}`} />
+                        </div>
+                        <span className={`text-xs font-medium ${isDragActive ? 'text-indigo-300' : 'text-slate-400 group-hover:text-indigo-300'}`}>
+                          {isDragActive ? 'Drop File Here' : 'Drag & Drop or Click to Upload'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Broadcast Action */}
+                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col">
+                  {setupMode === 'demo' && (
+                    <InfoTip title="Mass Alerts">
+                      Send a message to everyone's WhatsApp at once. Great for last-minute changes.
+                    </InfoTip>
+                  )}
+                  <h3 className="font-bold text-white mb-2">Broadcast Message</h3>
+                  <p className="text-sm text-slate-400 mb-6">Send a push notification to all {stats.activePlayers > 0 ? stats.activePlayers : 'rostered'} active players on WhatsApp.</p>
+                  <div className="mt-auto">
+                    <Button variant="secondary" size="sm" className="w-full justify-between group" onClick={() => setShowBroadcastModal(true)}>
+                      Draft Message <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Activity Feed Simulation */}
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+                <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+                  <div>
+                    <h3 className="font-bold text-white">Live Activity Log</h3>
+                    <p className="text-xs text-slate-500 mt-1">Real-time interactions between players and the AI.</p>
+                  </div>
+                  <span className="px-2 py-1 bg-green-900/30 text-green-400 text-[10px] uppercase font-bold rounded tracking-wider">Live</span>
+                </div>
+                
+                <div className="divide-y divide-slate-800/50 max-h-96 overflow-y-auto bg-slate-950/30">
+                  {activityLog.length === 0 ? (
+                    <div className="p-12 text-center flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                            <BotIcon className="w-6 h-6 text-slate-600" />
+                        </div>
+                        <p className="text-slate-400 mb-2">No activity yet.</p>
+                        <p className="text-xs text-slate-500">Upload a schedule to start the engine.</p>
+                    </div>
+                  ) : (
+                    activityLog.map((log) => (
+                      <div key={log.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors animate-fade-in border-l-2 border-transparent hover:border-indigo-500">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                            log.user === 'System' ? 'bg-indigo-500/20 text-indigo-400' :
+                            log.user === 'Admin' ? 'bg-purple-500/20 text-purple-400' :
+                            'bg-slate-800 text-slate-400'
+                          }`}>
+                            {log.user === 'System' ? <BotIcon className="w-4 h-4" /> : 
+                             log.user === 'Admin' ? <ZapIcon className="w-4 h-4" /> : 
+                             log.user.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="text-sm text-white font-medium">{log.query}</div>
+                            <div className="text-xs text-slate-500">{log.user} • {log.time}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${
+                              log.status === 'Sent' ? 'text-purple-400' : 
+                              log.status === 'Processed' ? 'text-blue-400' : 
+                              'text-green-400'
+                          }`}>{log.status}</span>
+                          {log.status === 'Answered' && <CheckIcon className="w-3 h-3 text-green-400" />}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Placeholder for other tabs */}
+          {activeTab !== 'overview' && (
+            <div className="flex flex-col items-center justify-center h-96 bg-slate-900/50 border border-slate-800 rounded-2xl border-dashed">
+               <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                  {activeTab === 'inbox' && <MessageCircleIcon className="w-8 h-8 text-slate-500" />}
+                  {activeTab === 'team' && <SmartphoneIcon className="w-8 h-8 text-slate-500" />}
+                  {activeTab === 'settings' && <ZapIcon className="w-8 h-8 text-slate-500" />}
+               </div>
+               <h3 className="text-xl font-bold text-white mb-2 capitalize">{activeTab} View</h3>
+               <p className="text-slate-400 mb-6">This module is available in the full version.</p>
+               <Button variant="outline" onClick={() => setActiveTab('overview')}>
+                 Return to Overview
+               </Button>
+            </div>
+          )}
+
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;
