@@ -1,95 +1,68 @@
-
-import React, { useState } from 'react';
-import Button from './Button';
+import React from 'react';
 import { AthplanLogo } from './icons/Icons';
 
-const Footer: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'success'>('idle');
-  const [isLoading, setIsLoading] = useState(false);
+interface FooterProps {
+  onNavigate?: (view: any) => void;
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+
+  const handleNav = (view: 'privacy' | 'terms' | 'aup') => (e: React.MouseEvent) => {
     e.preventDefault();
-    if (email && !isLoading) {
-      setIsLoading(true);
-      
-      // Simulate Backend API Call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock backend logging
-      console.log(`[Newsletter API] Successfully subscribed: ${email}`);
-      
-      setStatus('success');
-      setEmail('');
-      setIsLoading(false);
-      
-      // Reset status after 3 seconds
-      setTimeout(() => setStatus('idle'), 3000);
+    if (onNavigate) {
+      onNavigate(view);
+      window.scrollTo(0, 0);
     }
   };
 
   return (
-    <footer className="border-t border-slate-900 bg-slate-950 py-12 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 items-start">
+    <footer className="bg-slate-950 py-12 px-6 border-t border-slate-900">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Brand Column */}
-          <div>
+          <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <AthplanLogo className="w-7 h-7" />
-              <span className="font-bold text-lg text-slate-200">Athplan</span>
+              <AthplanLogo className="w-8 h-8" />
+              <span className="text-xl font-bold text-white tracking-tight">Athplan</span>
             </div>
-            <p className="text-slate-400 text-sm max-w-xs leading-relaxed mb-6">
-              The AI Operations Assistant for High-Performance Teams. 
-              Stop acting as a dispatcher. Start managing.
+            <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
+              The AI Operations Assistant for modern sports teams.
+              Automating logistics, scheduling, and player communications.
             </p>
           </div>
 
-          {/* Newsletter Column */}
-          <div className="w-full md:max-w-md md:ml-auto">
-            <h3 className="font-semibold text-white mb-2">Stay Updated</h3>
-            <p className="text-sm text-slate-400 mb-4">
-              Get the latest updates on new features and season openings.
-            </p>
-            
-            {status === 'success' ? (
-              <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400 text-sm flex items-center gap-2 animate-fade-in">
-                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                Thanks for subscribing! We'll keep you in the loop.
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="flex gap-2">
-                <input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors disabled:opacity-50"
-                  required
-                  disabled={isLoading}
-                />
-                <Button 
-                  type="submit" 
-                  size="sm" 
-                  className="whitespace-nowrap min-w-[100px]"
-                  disabled={isLoading}
-                >
-                  {isLoading ? ' joining...' : 'Subscribe'}
-                </Button>
-              </form>
-            )}
+          {/* Links Column */}
+          <div>
+            <h4 className="text-white font-bold mb-4">Product</h4>
+            <ul className="space-y-2 text-sm text-slate-400">
+              <li><a href="#features" className="hover:text-indigo-400 transition-colors">Features</a></li>
+              <li><a href="#how-it-works" className="hover:text-indigo-400 transition-colors">How it Works</a></li>
+              <li><a href="#pricing" className="hover:text-indigo-400 transition-colors">Pricing</a></li>
+            </ul>
+          </div>
+
+          {/* Legal/Contact Column */}
+          <div>
+            <h4 className="text-white font-bold mb-4">Company</h4>
+            <ul className="space-y-2 text-sm text-slate-400">
+              <li><button onClick={handleNav('privacy')} className="hover:text-indigo-400 transition-colors text-left">Privacy Policy</button></li>
+              <li><button onClick={handleNav('terms')} className="hover:text-indigo-400 transition-colors text-left">Terms of Service</button></li>
+              <li><button onClick={handleNav('aup')} className="hover:text-indigo-400 transition-colors text-left">Acceptable Use</button></li>
+            </ul>
           </div>
         </div>
 
         {/* Bottom Row */}
         <div className="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-slate-500 text-sm">
-            © {new Date().getFullYear()} Athplan AI. All rights reserved.
+          <div className="text-slate-500 text-sm flex gap-4">
+            <span>© {new Date().getFullYear()} Athplan AI. All rights reserved.</span>
           </div>
-          
+
           <div className="flex gap-6">
-            <a href="#" className="text-slate-500 hover:text-white transition-colors text-sm">Twitter</a>
-            <a href="#" className="text-slate-500 hover:text-white transition-colors text-sm">LinkedIn</a>
-            <a href="mailto:hello@athplan.com" className="text-slate-500 hover:text-white transition-colors text-sm">Contact</a>
+            <a href="https://x.com/athplan" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-white transition-colors text-sm">X</a>
+            <a href="https://www.linkedin.com/company/109755743/" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-white transition-colors text-sm">LinkedIn</a>
+            <a href="https://www.facebook.com/share/198JNouD4t/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-white transition-colors text-sm">Facebook</a>
+            <a href="mailto:info@athplan.com" className="text-slate-500 hover:text-white transition-colors text-sm">Contact</a>
           </div>
         </div>
       </div>

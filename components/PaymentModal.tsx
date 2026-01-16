@@ -117,7 +117,18 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
             // Fetch the PaymentIntent client secret from our Supabase Edge Function
             const fetchClientSecret = async () => {
                 try {
-                    const { data, error } = await supabase.functions.invoke('payment-sheet');
+                    // Get current session user data
+                    const { data: { session } } = await supabase.auth.getSession();
+                    const user = session?.user;
+
+                    const { data, error } = await supabase.functions.invoke('payment-sheet', {
+                        body: {
+                            amount: 4900, // Dynamic based on plan in real app
+                            email: user?.email,
+                            user_id: user?.id,
+                            voiceflow_user_id: user?.user_metadata?.voiceflow_id // Assuming this exists or is null
+                        }
+                    });
 
                     if (error) {
                         console.error('Error invoking function:', error);

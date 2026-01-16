@@ -3,12 +3,20 @@ import React from 'react';
 import Button from './Button';
 import { ArrowRightIcon } from './icons/Icons';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  onSignup: () => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onSignup }) => {
+  const scrollToHowItWorks = () => {
+    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <section className="relative w-full pt-32 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden">
       {/* Background Glow Effects */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[500px] bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none -z-10 opacity-60 animate-fade-in" />
-      
+
       <div className="max-w-4xl mx-auto text-center flex flex-col items-center z-10 relative">
         {/* Badge */}
         <div className="opacity-0 animate-fade-in-up inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/50 border border-slate-800 mb-8 backdrop-blur-sm">
@@ -33,11 +41,11 @@ const Hero: React.FC = () => {
         {/* Buttons */}
         <div className="opacity-0 animate-fade-in-up delay-300 flex flex-col items-center w-full sm:w-auto">
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            <Button size="lg" className="w-full sm:w-auto group">
+            <Button size="lg" className="w-full sm:w-auto group" onClick={onSignup}>
               Start Free Pilot
               <ArrowRightIcon className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
-            <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+            <Button variant="secondary" size="lg" className="w-full sm:w-auto" onClick={scrollToHowItWorks}>
               See How It Works
             </Button>
           </div>
@@ -50,14 +58,14 @@ const Hero: React.FC = () => {
         <div className="opacity-0 animate-fade-in-up delay-500 mt-16 pt-8 border-t border-slate-800/50 flex flex-col items-center gap-4">
           <p className="text-sm text-slate-500">Trusted by operations managers in</p>
           <div className="flex items-center gap-8 grayscale opacity-50">
-             {/* Placeholder logos using text for simplicity as strictly no external images allowed unless placeholder service */}
-             <span className="font-bold text-slate-400 text-lg">LEAGUE</span>
-             <span className="font-bold text-slate-400 text-lg">DIVISION 1</span>
-             <span className="font-bold text-slate-400 text-lg">ACADEMY</span>
+            {/* Placeholder logos using text for simplicity as strictly no external images allowed unless placeholder service */}
+            <span className="font-bold text-slate-400 text-lg">LEAGUE</span>
+            <span className="font-bold text-slate-400 text-lg">DIVISION 1</span>
+            <span className="font-bold text-slate-400 text-lg">ACADEMY</span>
           </div>
         </div>
       </div>
-      
+
       {/* Grid Background Overlay */}
       <div className="absolute inset-0 bg-grid-pattern [mask-image:linear-gradient(to_bottom,white,transparent)] -z-20 opacity-20 animate-fade-in" />
     </section>

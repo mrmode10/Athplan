@@ -10,6 +10,9 @@ import Footer from './components/Footer';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
+import AcceptableUsePolicy from './components/AcceptableUsePolicy';
 import { supabase } from './lib/supabase';
 import { User } from './lib/mockBackend'; // We will gradually replace this type or keep it compatible
 
@@ -24,9 +27,10 @@ const mapSupabaseUser = (user: any): User => ({
 });
 
 const App: React.FC = () => {
-    const [currentView, setCurrentView] = useState<'home' | 'login' | 'signup' | 'dashboard'>('home');
+    const [currentView, setCurrentView] = useState<'home' | 'login' | 'signup' | 'dashboard' | 'privacy' | 'terms' | 'aup'>('home');
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedPlan, setSelectedPlan] = useState<string>('starter');
 
     useEffect(() => {
         // Check active session
@@ -76,21 +80,22 @@ const App: React.FC = () => {
             {/* VIEW ROUTING */}
             {currentView === 'home' && (
                 <main>
-                    <Hero />
+                    <Hero onSignup={() => { setSelectedPlan('starter'); setCurrentView('signup'); }} />
                     <div id="features"><BentoFeatures /></div>
                     <div id="how-it-works"><HowItWorks /></div>
                     <ROICalculator />
-                    <div id="pricing"><Pricing onSignup={() => setCurrentView('signup')} /></div>
-                    <Footer />
+                    <div id="pricing"><Pricing onSignup={(plan) => { setSelectedPlan(plan); setCurrentView('signup'); }} /></div>
+                    <Footer onNavigate={setCurrentView} />
                 </main>
             )}
 
             {currentView === 'login' && (
                 <Login
                     onBack={() => setCurrentView('home')}
-                    onSignup={() => setCurrentView('signup')}
+                    onSignup={() => { setSelectedPlan('starter'); setCurrentView('signup'); }}
                     onSuccess={(u) => {
-                        // Auth state listener will handle user set, we just nav
+                        // Allow manual override for demo
+                        setUser(u);
                         setCurrentView('dashboard');
                     }}
                 />
@@ -98,11 +103,27 @@ const App: React.FC = () => {
 
             {currentView === 'signup' && (
                 <Signup
+                    selectedPlan={selectedPlan}
                     onBack={() => setCurrentView('home')}
                     onLogin={() => setCurrentView('login')}
                     onSuccess={(u) => {
+                        setUser(u);
                         setCurrentView('dashboard');
                     }}
+                />
+            )}
+
+            {currentView === 'privacy' && (
+                <PrivacyPolicy
+                    onBack={() => setCurrentView('home')}
+                    onNavigate={setCurrentView}
+                />
+            )}
+
+            {currentView === 'terms' && (
+                <TermsOfService
+                    onBack={() => setCurrentView('home')}
+                    onNavigate={setCurrentView}
                 />
             )}
 

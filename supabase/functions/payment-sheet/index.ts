@@ -26,7 +26,16 @@ serve(async (req) => {
     })
 
     try {
-        const customer = await stripe.customers.create();
+        const { amount, email, user_id, voiceflow_user_id, plan } = await req.json()
+
+        const customer = await stripe.customers.create({
+            email: email,
+            metadata: {
+                user_id: user_id,
+                voiceflow_user_id: voiceflow_user_id,
+                plan: plan
+            }
+        });
 
         const ephemeralKey = await stripe.ephemeralKeys.create(
             { customer: customer.id },
@@ -34,12 +43,18 @@ serve(async (req) => {
         );
 
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: 4900,
+            amount: amount || 4900, // Default to $49.00
             currency: 'usd',
             customer: customer.id,
             automatic_payment_methods: {
                 enabled: true,
             },
+            metadata: {
+                user_id: user_id,
+                email: email,
+                voiceflow_user_id: voiceflow_user_id,
+                plan: plan || 'starter'
+            }
         });
 
         return new Response(

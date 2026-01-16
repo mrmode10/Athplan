@@ -65,26 +65,25 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
       <div className="bg-indigo-900/20 border border-indigo-500/30 rounded-full py-2 px-6 mb-16 max-w-max mx-auto flex items-center gap-2 animate-fade-in">
         <span className="text-lg">🎁</span>
         <p className="text-indigo-200 text-sm font-medium">
-           All plans include a <span className="text-white font-bold">14-day free trial</span>. No credit card required to start.
+          All plans include a <span className="text-white font-bold">14-day free trial</span>. No credit card required to start.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
         {tiers.map((tier, index) => (
-          <div 
+          <div
             key={tier.name}
-            className={`relative rounded-2xl p-8 flex flex-col border transition-all duration-300 ${
-              tier.highlight 
-                ? 'bg-slate-900/80 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.15)] transform md:-translate-y-4' 
-                : 'bg-slate-950 border-slate-800 hover:border-slate-700'
-            }`}
+            className={`relative rounded-2xl p-8 flex flex-col border transition-all duration-300 ${tier.highlight
+              ? 'bg-slate-900/80 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.15)] transform md:-translate-y-4'
+              : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+              }`}
           >
             {tier.highlight && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
                 Most Popular
               </div>
             )}
-            
+
             <div className="mb-6">
               <h3 className="text-lg font-medium text-white mb-2">{tier.name}</h3>
               <div className="flex items-baseline gap-1">
@@ -103,10 +102,10 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
               ))}
             </ul>
 
-            <Button 
-              variant={tier.highlight ? 'primary' : 'outline'} 
+            <Button
+              variant={tier.highlight ? 'primary' : 'outline'}
               className="w-full"
-              onClick={onSignup}
+              onClick={() => onSignup(tier.name)}
             >
               Start 14-Day Free Trial
             </Button>
@@ -122,11 +121,16 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
             <h3 className="text-2xl font-bold text-white">Enterprise & Academies</h3>
           </div>
           <p className="text-slate-400 max-w-xl">
-            Need to manage multiple teams, an entire academy, or more than 30 users? 
+            Need to manage multiple teams, an entire academy, or more than 30 users?
             Get custom reporting, SLA guarantees, and dedicated account management.
           </p>
         </div>
-        <Button variant="secondary" size="lg" className="shrink-0">
+        <Button
+          variant="secondary"
+          size="lg"
+          className="shrink-0"
+          onClick={() => window.location.href = 'mailto:info@athplan.com'}
+        >
           Contact Sales
         </Button>
       </div>
