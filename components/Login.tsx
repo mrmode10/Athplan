@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import Button from './Button';
 import { ArrowRightIcon, AthplanLogo, GoogleIcon } from './icons/Icons';
-import { mockBackend, User } from '../lib/mockBackend';
+import { User } from '../lib/mockBackend';
+import { supabase } from '../lib/supabase';
 
 interface LoginProps {
   onBack: () => void;
@@ -34,15 +34,21 @@ const Login: React.FC<LoginProps> = ({ onBack, onSignup, onSuccess }) => {
     setError('');
 
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
-    
+
     try {
-      const result = await mockBackend.login(email, password);
-      if (result.success && result.user) {
-        onSuccess(result.user);
-      } else {
-        setError(result.message || 'Incorrect email or password.');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else if (data.user) {
+        // App.tsx listener will handle navigation, but we call onSuccess to be safe
+        // We construct a partial object or rely on App.tsx to fetch profile
+        onSuccess(data.user as any);
       }
     } catch (err) {
       setError('Network error. Please try again later.');
@@ -55,10 +61,11 @@ const Login: React.FC<LoginProps> = ({ onBack, onSignup, onSuccess }) => {
     setIsLoading(true);
     setError('');
     try {
-      const result = await mockBackend.continueWithGoogle();
-      if (result.success) {
-        onSuccess(result.user);
-      }
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      if (error) throw error;
+      // OAuth will redirect, so no onSuccess call needed here immediately
     } catch (err) {
       setError('Unable to connect to Google. Please try again.');
     } finally {
@@ -68,13 +75,13 @@ const Login: React.FC<LoginProps> = ({ onBack, onSignup, onSuccess }) => {
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center px-6 pt-20 pb-10 bg-slate-950 relative overflow-hidden">
-      
+
       {/* Background Decoration */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-[500px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none -z-10" />
 
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <div 
+          <div
             onClick={onBack}
             className="inline-flex items-center gap-2 cursor-pointer mb-8 hover:opacity-80 transition-opacity"
           >
@@ -86,8 +93,8 @@ const Login: React.FC<LoginProps> = ({ onBack, onSignup, onSuccess }) => {
         </div>
 
         <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-xl">
-          
-          <button 
+
+          <button
             type="button"
             onClick={handleGoogleLogin}
             disabled={isLoading}
@@ -106,8 +113,8 @@ const Login: React.FC<LoginProps> = ({ onBack, onSignup, onSuccess }) => {
           <form className="space-y-5" onSubmit={handleLogin}>
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 name="email"
                 autoComplete="email"
                 value={email}
@@ -115,21 +122,20 @@ const Login: React.FC<LoginProps> = ({ onBack, onSignup, onSuccess }) => {
                   setEmail(e.target.value);
                   if (error) setError('');
                 }}
-                className={`w-full px-4 py-3 bg-slate-950 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors ${
-                  error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
-                }`}
+                className={`w-full px-4 py-3 bg-slate-950 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
+                  }`}
                 placeholder="coach@team.com"
                 required
               />
             </div>
-            
+
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-sm font-medium text-slate-300">Password</label>
                 <a href="#" className="text-xs text-indigo-400 hover:text-indigo-300">Forgot password?</a>
               </div>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 name="password"
                 autoComplete="current-password"
                 value={password}
@@ -137,9 +143,8 @@ const Login: React.FC<LoginProps> = ({ onBack, onSignup, onSuccess }) => {
                   setPassword(e.target.value);
                   if (error) setError('');
                 }}
-                className={`w-full px-4 py-3 bg-slate-950 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors ${
-                  error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
-                }`}
+                className={`w-full px-4 py-3 bg-slate-950 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
+                  }`}
                 placeholder="••••••••"
                 required
               />
@@ -173,7 +178,7 @@ const Login: React.FC<LoginProps> = ({ onBack, onSignup, onSuccess }) => {
             </p>
           </div>
         </div>
-        
+
         <button onClick={onBack} className="w-full text-center mt-8 text-slate-500 hover:text-slate-300 text-sm transition-colors">
           ← Back to Home
         </button>

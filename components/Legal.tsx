@@ -27,12 +27,12 @@ const Legal: React.FC<LegalProps> = ({ onBack, onNavigate }) => {
                     <div className="space-y-6">
                         <div>
                             <p className="font-semibold text-white">Effective Date: {new Date().toLocaleDateString()}</p>
-                            <p className="font-semibold text-white">Application Name: Antigravity (by Athplan)</p>
+                            <p className="font-semibold text-white">Application Name: Athplan</p>
                         </div>
 
                         <div>
                             <h3 className="text-lg font-semibold text-slate-100 mb-2">1. Introduction</h3>
-                            <p>Welcome to Antigravity ("we," "our," or "us"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our WhatsApp-based AI scheduling assistant.</p>
+                            <p>Welcome to Athplan ("we," "our," or "us"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our WhatsApp-based AI scheduling assistant.</p>
                         </div>
 
                         <div>
@@ -89,12 +89,12 @@ const Legal: React.FC<LegalProps> = ({ onBack, onNavigate }) => {
 
                         <div>
                             <h3 className="text-lg font-semibold text-slate-100 mb-2">1. Acceptance of Terms</h3>
-                            <p>By accessing or using Antigravity via WhatsApp or our website, you agree to be bound by these Terms and Conditions.</p>
+                            <p>By accessing or using Athplan via WhatsApp or our website, you agree to be bound by these Terms and Conditions.</p>
                         </div>
 
                         <div>
                             <h3 className="text-lg font-semibold text-slate-100 mb-2">2. Description of Service</h3>
-                            <p>Antigravity is an AI-powered assistant designed to retrieve schedule information and provide concise answers. The service is provided "as is" and is subject to availability.</p>
+                            <p>Athplan is an AI-powered assistant designed to retrieve schedule information and provide concise answers. The service is provided "as is" and is subject to availability.</p>
                         </div>
 
                         <div>
@@ -109,14 +109,14 @@ const Legal: React.FC<LegalProps> = ({ onBack, onNavigate }) => {
                         <div>
                             <h3 className="text-lg font-semibold text-slate-100 mb-2">4. Service Limitations</h3>
                             <ul className="list-disc pl-5 space-y-1">
-                                <li><strong className="text-indigo-200">Accuracy:</strong> While we strive for accuracy, Antigravity is an AI system and may occasionally provide incorrect information. Always verify critical schedule details manually.</li>
+                                <li><strong className="text-indigo-200">Accuracy:</strong> While we strive for accuracy, Athplan is an AI system and may occasionally provide incorrect information. Always verify critical schedule details manually.</li>
                                 <li><strong className="text-indigo-200">Response Style:</strong> The bot is programmed to be "blunt" and concise (under 25 words). This is a feature of the service, not a defect.</li>
                             </ul>
                         </div>
 
                         <div>
                             <h3 className="text-lg font-semibold text-slate-100 mb-2">5. Limitation of Liability</h3>
-                            <p>Athplan/Antigravity shall not be liable for any indirect, incidental, or consequential damages resulting from the use or inability to use the service, including missed appointments or scheduling errors.</p>
+                            <p>Athplan shall not be liable for any indirect, incidental, or consequential damages resulting from the use or inability to use the service, including missed appointments or scheduling errors.</p>
                         </div>
 
                         <div>
