@@ -26,3 +26,7 @@ yarn-error.log*
 
 # Supabase
 supabase/.temp
+
+# Archives
+*.zip
+*.tar.gz

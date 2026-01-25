@@ -13,6 +13,7 @@ import Dashboard from './components/Dashboard';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import AcceptableUsePolicy from './components/AcceptableUsePolicy';
+import Legal from './components/Legal';
 import { supabase } from './lib/supabase';
 import { User } from './lib/mockBackend'; // We will gradually replace this type or keep it compatible
 
@@ -27,7 +28,7 @@ const mapSupabaseUser = (user: any): User => ({
 });
 
 const App: React.FC = () => {
-    const [currentView, setCurrentView] = useState<'home' | 'login' | 'signup' | 'dashboard' | 'privacy' | 'terms' | 'aup'>('home');
+    const [currentView, setCurrentView] = useState<'home' | 'login' | 'signup' | 'dashboard' | 'privacy' | 'terms' | 'aup' | 'legal'>('home');
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedPlan, setSelectedPlan] = useState<string>('starter');
@@ -140,6 +141,13 @@ const App: React.FC = () => {
                     onBack={() => setCurrentView('home')}
                     onSignup={() => setCurrentView('signup')}
                     onSuccess={() => setCurrentView('dashboard')}
+                />
+            )}
+
+            {currentView === 'legal' && (
+                <Legal
+                    onBack={() => setCurrentView('home')}
+                    onNavigate={setCurrentView}
                 />
             )}
 

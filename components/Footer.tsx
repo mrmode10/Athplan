@@ -45,9 +45,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div>
             <h4 className="text-white font-bold mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li><button onClick={handleNav('privacy')} className="hover:text-indigo-400 transition-colors text-left">Privacy Policy</button></li>
-              <li><button onClick={handleNav('terms')} className="hover:text-indigo-400 transition-colors text-left">Terms of Service</button></li>
-              <li><button onClick={handleNav('aup')} className="hover:text-indigo-400 transition-colors text-left">Acceptable Use</button></li>
+              <li><button onClick={handleNav('legal' as any)} className="hover:text-indigo-400 transition-colors text-left">Legal (Privacy & Terms)</button></li>
             </ul>
           </div>
         </div>
