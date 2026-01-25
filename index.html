@@ -911,7 +911,43 @@
            ========================================= */
         const supabaseUrl = 'https://haicfgsgimpwnukympab.supabase.co';
         const supabaseKey = 'sb_publishable_TlM38PD842aKFHGgUvmrdQ_wWrdhweW';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let supabase;
+        try {
+            if (!window.supabase) {
+                console.error("Supabase client not loaded from CDN.");
+                alert("Critical Error: Core libraries failed to load. Please refresh the page or disable ad-blockers.");
+                throw new Error("Supabase not found");
+            }
+            supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        } catch (err) {
+            console.error("Supabase Init Failed:", err);
+            // Fallback mock to prevent script crash and allow partial functionality
+            supabase = {
+                auth: {
+                    getUser: async () => ({ data: { user: null } }),
+                    getSession: async () => ({ data: { session: null } }),
+                    signInWithPassword: async () => ({ error: { message: "Offline mode: Cannot verify credentials." } }),
+                    signUp: async () => ({ error: { message: "Offline mode: Cannot create account." } }),
+                    signOut: async () => ({ error: null })
+                },
+                from: (table) => ({
+                    select: () => ({
+                        order: () => ({
+                            limit: () => ({ data: [] }),
+                            then: (cb) => cb({ data: [], error: null }) // mock promise-like check
+                        }),
+                        eq: () => ({ single: () => ({ data: null }) }),
+                        then: (cb) => cb({ data: [], error: null })
+                    }),
+                    insert: () => ({ error: null, data: null }),
+                    update: () => ({ error: null, data: null })
+                }),
+                functions: {
+                    invoke: async () => ({ error: null, data: { paymentIntent: 'mock_secret' } })
+                }
+            };
+        }
 
         const mockBackend = {
             getUser: async () => {
@@ -980,9 +1016,43 @@
             const container = document.getElementById('pricing-container');
             if (!container) return;
 
-            const { data: plans, error } = await supabase.from('pricing_plans').select('*').order('display_order');
+            // Fallback hardcoded plans if Supabase connection fails
+            const fallbackPlans = [
+                {
+                    name: 'Starter Pack',
+                    price: '$99',
+                    period: '/mo',
+                    is_highlighted: false,
+                    features: JSON.stringify(['Up to 20 Players', 'Basic Automation', 'Email Support'])
+                },
+                {
+                    name: 'All Star',
+                    price: '$199',
+                    period: '/mo',
+                    is_highlighted: true,
+                    features: JSON.stringify(['Up to 50 Players', 'Advanced Analytics', 'Priority Support', 'Custom Branding'])
+                },
+                {
+                    name: 'Hall of Fame',
+                    price: '$249',
+                    period: '/mo',
+                    is_highlighted: false,
+                    features: JSON.stringify(['Unlimited Players', 'Dedicated Acct Manager', 'API Access', 'White Label'])
+                }
+            ];
 
-            if (error || !plans) {
+            let plans = fallbackPlans;
+
+            try {
+                if (supabase && typeof supabase.from === 'function') {
+                    const { data, error } = await supabase.from('pricing_plans').select('*').order('display_order');
+                    if (!error && data && data.length > 0) {
+                        plans = data;
+                    }
+                }
+            } catch (e) { console.warn("Using offline pricing."); }
+
+            if (!plans) {
                 container.innerHTML = '<div class="text-red-400">Failed to load pricing.</div>';
                 return;
             }
@@ -1480,23 +1550,7 @@
             }
         })();
     </script>
-    <!-- Voiceflow Chat Widget -->
-    <script type="text/javascript">
-        (function (d, t) {
-            var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
-            v.onload = function () {
-                window.voiceflow.chat.load({
-                    verify: { projectID: '690b11d40d3a37ebfe8cc9b4' },
-                    url: 'https://general-runtime.voiceflow.com',
-                    versionID: 'production',
-                    voice: {
-                        url: "https://runtime-api.voiceflow.com"
-                    }
-                });
-            }
-            v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
-        })(document, 'script');
-    </script>
+
 </body>
 
 </html>
