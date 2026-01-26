@@ -13,7 +13,7 @@ interface PaymentModalProps {
     onClose: () => void;
 }
 
-const CheckoutForm = ({ onClose }: { onClose: () => void }) => {
+const CheckoutForm = ({ onClose, clientSecret }: { onClose: () => void, clientSecret: string }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [message, setMessage] = useState<string | null>(null);
@@ -24,30 +24,35 @@ const CheckoutForm = ({ onClose }: { onClose: () => void }) => {
             return;
         }
 
-        const clientSecret = new URLSearchParams(window.location.search).get(
+        const retrievedSecret = new URLSearchParams(window.location.search).get(
+            "setup_intent_client_secret"
+        ) || new URLSearchParams(window.location.search).get(
             "payment_intent_client_secret"
         );
 
-        if (!clientSecret) {
+        if (!retrievedSecret) {
             return;
         }
 
-        stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
-            switch (paymentIntent?.status) {
-                case "succeeded":
-                    setMessage("Payment succeeded!");
-                    break;
-                case "processing":
-                    setMessage("Your payment is processing.");
-                    break;
-                case "requires_payment_method":
-                    setMessage("Your payment was not successful, please try again.");
-                    break;
-                default:
-                    setMessage("Something went wrong.");
-                    break;
-            }
-        });
+        if (retrievedSecret.startsWith('pi_')) {
+            stripe.retrievePaymentIntent(retrievedSecret).then(({ paymentIntent }) => {
+                switch (paymentIntent?.status) {
+                    case "succeeded": setMessage("Payment succeeded!"); break;
+                    case "processing": setMessage("Your payment is processing."); break;
+                    case "requires_payment_method": setMessage("Payment failed, please try again."); break;
+                    default: setMessage("Something went wrong."); break;
+                }
+            });
+        } else {
+            stripe.retrieveSetupIntent(retrievedSecret).then(({ setupIntent }) => {
+                switch (setupIntent?.status) {
+                    case "succeeded": setMessage("Payment method saved! Your trial is active."); break;
+                    case "processing": setMessage("Processing details..."); break;
+                    case "requires_payment_method": setMessage("Failed to save details. Please try again."); break;
+                    default: setMessage("Something went wrong."); break;
+                }
+            });
+        }
     }, [stripe]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -59,14 +64,29 @@ const CheckoutForm = ({ onClose }: { onClose: () => void }) => {
 
         setIsLoading(true);
 
-        const { error } = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-                // Return URL where the customer should be redirected after the payment.
-                return_url: window.location.href,
-            },
-            redirect: 'if_required'
-        });
+        let error;
+
+        if (clientSecret.startsWith('pi_')) {
+            // Payment Intent (Charge)
+            const result = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: window.location.href,
+                },
+                redirect: 'if_required'
+            });
+            error = result.error;
+        } else {
+            // Setup Intent (Trial Subscription)
+            const result = await stripe.confirmSetup({
+                elements,
+                confirmParams: {
+                    return_url: window.location.href,
+                },
+                redirect: 'if_required'
+            });
+            error = result.error;
+        }
 
         if (error) {
             if (error.type === "card_error" || error.type === "validation_error") {
@@ -75,8 +95,14 @@ const CheckoutForm = ({ onClose }: { onClose: () => void }) => {
                 setMessage("An unexpected error occurred.");
             }
         } else {
-            setMessage("Payment successful!");
-            // Optionally verify with backend here
+            // Success!
+            if (clientSecret.startsWith('pi_')) {
+                setMessage("Payment successful!");
+            } else {
+                setMessage("Trial activated! You wont be charged for 14 days.");
+            }
+
+            // Close after delay
             setTimeout(onClose, 2000);
         }
 
@@ -139,7 +165,10 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
                         return;
                     }
 
-                    if (data && data.paymentIntent) {
+                    if (data && data.clientSecret) {
+                        setClientSecret(data.clientSecret);
+                    } else if (data && data.paymentIntent) {
+                        // Fallback for legacy
                         setClientSecret(data.paymentIntent);
                     }
                 } catch (err) {
@@ -183,7 +212,7 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
 
                 {clientSecret ? (
                     <Elements options={options} stripe={stripePromise}>
-                        <CheckoutForm onClose={onClose} />
+                        <CheckoutForm onClose={onClose} clientSecret={clientSecret} />
                     </Elements>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-48 space-y-4">

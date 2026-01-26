@@ -26,41 +26,57 @@ serve(async (req) => {
     })
 
     try {
-        const { amount, email, user_id, voiceflow_user_id, plan } = await req.json()
+        const { email, user_id, voiceflow_user_id, plan } = await req.json()
 
+        // Map plan to amount (in cents)
+        let amount = 9900; // Starter
+        if (plan === 'All Star') amount = 19900;
+        if (plan === 'Hall of Fame') amount = 24900;
+
+        // 1. Create Customer
         const customer = await stripe.customers.create({
             email: email,
             metadata: {
                 user_id: user_id,
                 voiceflow_user_id: voiceflow_user_id,
-                plan: plan
             }
         });
 
-        const ephemeralKey = await stripe.ephemeralKeys.create(
-            { customer: customer.id },
-            { apiVersion: '2022-11-15' }
-        );
-
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount || 4900, // Default to $49.00
-            currency: 'usd',
+        // 2. Create Subscription with Trial
+        const subscription = await stripe.subscriptions.create({
             customer: customer.id,
-            automatic_payment_methods: {
-                enabled: true,
+            items: [{
+                price_data: {
+                    currency: 'usd',
+                    product_data: {
+                        name: plan || 'Starter Pack',
+                    },
+                    unit_amount: amount,
+                    recurring: {
+                        interval: 'month',
+                    },
+                },
+            }],
+            trial_period_days: 14,
+            payment_behavior: 'default_incomplete',
+            payment_settings: {
+                save_default_payment_method: 'on_subscription',
             },
+            expand: ['pending_setup_intent'],
             metadata: {
                 user_id: user_id,
-                email: email,
-                voiceflow_user_id: voiceflow_user_id,
-                plan: plan || 'starter'
+                plan: plan || 'Starter',
             }
         });
+
+        // 3. Return the Setup Intent Secret
+        // For a trial, payment_intent is usually null, we use pending_setup_intent
+        const setupIntent = subscription.pending_setup_intent;
 
         return new Response(
             JSON.stringify({
-                paymentIntent: paymentIntent.client_secret,
-                ephemeralKey: ephemeralKey.secret,
+                clientSecret: setupIntent.client_secret, // Standardize name
+                subscriptionId: subscription.id,
                 customer: customer.id,
                 publishableKey: Deno.env.get('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY') ?? "pk_live_51Smuh3LHktvXWxv0olVsHpAEIxRL0VTbHP6k9HFd7MNmYI7ZqmORLjTan8jnzkH2021crdfmqcFm1voI1fsbbRQT003cWCfR2j",
             }),
