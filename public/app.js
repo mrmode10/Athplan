@@ -3,7 +3,7 @@ console.log('[APP.JS] Script starting...');
 /* =========================================
    1. SUPABASE CONFIG & STATE
    ========================================= */
-const supabaseUrl = 'https://haicfgsgimpwnukympab.supabase.co';
+const supabaseUrl = 'https://ppjzhesecvagtwfbvoek.supabase.co';
 const supabaseKey = 'sb_publishable_TlM38PD842aKFHGgUvmrdQ_wWrdhweW';
 
 // Initialize Supabase with retry/fallback

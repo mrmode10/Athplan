@@ -11,9 +11,11 @@ const stripePromise = loadStripe(STRIPE_KEY);
 interface PaymentModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void; // Optional callback for success
+    plan: string;
 }
 
-const CheckoutForm = ({ onClose, clientSecret }: { onClose: () => void, clientSecret: string }) => {
+const CheckoutForm = ({ onClose, onSuccess, clientSecret }: { onClose: () => void, onSuccess?: () => void, clientSecret: string }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [message, setMessage] = useState<string | null>(null);
@@ -37,7 +39,10 @@ const CheckoutForm = ({ onClose, clientSecret }: { onClose: () => void, clientSe
         if (retrievedSecret.startsWith('pi_')) {
             stripe.retrievePaymentIntent(retrievedSecret).then(({ paymentIntent }) => {
                 switch (paymentIntent?.status) {
-                    case "succeeded": setMessage("Payment succeeded!"); break;
+                    case "succeeded":
+                        setMessage("Payment succeeded!");
+                        if (onSuccess) onSuccess();
+                        break;
                     case "processing": setMessage("Your payment is processing."); break;
                     case "requires_payment_method": setMessage("Payment failed, please try again."); break;
                     default: setMessage("Something went wrong."); break;
@@ -46,14 +51,17 @@ const CheckoutForm = ({ onClose, clientSecret }: { onClose: () => void, clientSe
         } else {
             stripe.retrieveSetupIntent(retrievedSecret).then(({ setupIntent }) => {
                 switch (setupIntent?.status) {
-                    case "succeeded": setMessage("Payment method saved! Your trial is active."); break;
+                    case "succeeded":
+                        setMessage("Payment method saved! Your trial is active.");
+                        if (onSuccess) onSuccess();
+                        break;
                     case "processing": setMessage("Processing details..."); break;
                     case "requires_payment_method": setMessage("Failed to save details. Please try again."); break;
                     default: setMessage("Something went wrong."); break;
                 }
             });
         }
-    }, [stripe]);
+    }, [stripe, onSuccess]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -102,8 +110,11 @@ const CheckoutForm = ({ onClose, clientSecret }: { onClose: () => void, clientSe
                 setMessage("Trial activated! You wont be charged for 14 days.");
             }
 
-            // Close after delay
-            setTimeout(onClose, 2000);
+            // Close after delay - call onSuccess if provided, otherwise onClose
+            setTimeout(() => {
+                if (onSuccess) onSuccess();
+                else onClose();
+            }, 2000);
         }
 
         setIsLoading(false);
@@ -113,12 +124,16 @@ const CheckoutForm = ({ onClose, clientSecret }: { onClose: () => void, clientSe
         <form id="payment-form" onSubmit={handleSubmit} className="space-y-6">
             <PaymentElement id="payment-element" options={{ layout: 'tabs' }} />
             <div className="flex justify-between items-center mt-4">
+                {/* Prevent closing without payment if it's mandatory. 
+                   For now, we remove the cancel button or make it strictly 'Go Back' which might logout?
+                   However, the design usually allows 'Cancel' to review order or change plan.
+                */}
                 <button
                     type="button"
                     onClick={onClose}
                     className="text-slate-400 hover:text-white transition-colors"
                 >
-                    Cancel
+                    Back
                 </button>
                 <button
                     disabled={isLoading || !stripe || !elements}
@@ -126,7 +141,7 @@ const CheckoutForm = ({ onClose, clientSecret }: { onClose: () => void, clientSe
                     className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-full font-semibold transition-all shadow-[0_0_15px_rgba(37,99,235,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <span id="button-text">
-                        {isLoading ? <div className="spinner" id="spinner">Processing...</div> : "Pay now"}
+                        {isLoading ? <div className="spinner" id="spinner">Processing...</div> : "Start Trial"}
                     </span>
                 </button>
             </div>
@@ -135,7 +150,7 @@ const CheckoutForm = ({ onClose, clientSecret }: { onClose: () => void, clientSe
     );
 }
 
-export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, onSuccess, plan }: PaymentModalProps) {
     const [clientSecret, setClientSecret] = useState("");
 
     useEffect(() => {
@@ -149,7 +164,7 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
 
                     const { data, error } = await supabase.functions.invoke('payment-sheet', {
                         body: {
-                            amount: 4900, // Dynamic based on plan in real app
+                            plan: plan,
                             email: user?.email,
                             user_id: user?.id,
                             voiceflow_user_id: user?.user_metadata?.voiceflow_id // Assuming this exists or is null
@@ -212,7 +227,7 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
 
                 {clientSecret ? (
                     <Elements options={options} stripe={stripePromise}>
-                        <CheckoutForm onClose={onClose} clientSecret={clientSecret} />
+                        <CheckoutForm onClose={onClose} onSuccess={onSuccess} clientSecret={clientSecret} />
                     </Elements>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-48 space-y-4">

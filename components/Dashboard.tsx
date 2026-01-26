@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Button from './Button';
 import { AthplanLogo, BotIcon, MessageCircleIcon, SmartphoneIcon, ZapIcon, CheckIcon, XIcon, ArrowRightIcon } from './icons/Icons';
 import { User } from '../lib/mockBackend';
+import GroupLinks from './GroupLinks';
 
 interface DashboardProps {
   user: User;
@@ -45,7 +46,7 @@ const InfoTip: React.FC<{ title: string; children: React.ReactNode }> = ({ title
 const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [setupMode, setSetupMode] = useState<SetupMode>('undecided');
-  
+
   // State
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
   const [stats, setStats] = useState({ queries: 0, activePlayers: 0, timeSaved: 0 });
@@ -106,7 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       setUploadFileName(file.name);
@@ -135,7 +136,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       setIsUploading(false);
       setUploadProgress(0);
       setUploadFileName('');
-      
+
       // Update stats for effect
       setStats(prev => ({ ...prev, queries: prev.queries + 1, timeSaved: prev.timeSaved + 0.1 }));
 
@@ -166,7 +167,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         status: 'Sent'
       };
       setActivityLog(prev => [newLog, ...prev]);
-      
+
       setIsSendingBroadcast(false);
       setBroadcastMessage('');
       setShowBroadcastModal(false);
@@ -175,7 +176,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row relative overflow-hidden">
-      
+
       {/* --- ONBOARDING MODAL --- */}
       {setupMode === 'undecided' && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
@@ -184,10 +185,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               <h2 className="text-3xl font-bold text-white mb-2">Welcome to your Trial! 🚀</h2>
               <p className="text-slate-400">How would you like to start exploring Athplan?</p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Option 1: Demo */}
-              <button 
+              <button
                 onClick={() => setSetupMode('demo')}
                 className="group p-6 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-indigo-500 hover:bg-slate-800 transition-all text-left"
               >
@@ -201,7 +202,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               </button>
 
               {/* Option 2: Blank */}
-              <button 
+              <button
                 onClick={() => setSetupMode('blank')}
                 className="group p-6 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-green-500 hover:bg-slate-800 transition-all text-left"
               >
@@ -228,13 +229,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 <XIcon className="w-6 h-6" />
               </button>
             </div>
-            
+
             <form onSubmit={handleBroadcastSend}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Message to {stats.activePlayers > 0 ? stats.activePlayers : '0'} Active Players
                 </label>
-                <textarea 
+                <textarea
                   value={broadcastMessage}
                   onChange={(e) => setBroadcastMessage(e.target.value)}
                   className="w-full h-32 bg-slate-950 border border-slate-800 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
@@ -259,17 +260,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           <AthplanLogo className="w-8 h-8" />
           <span className="font-bold text-lg text-white">Athplan</span>
         </div>
-        
+
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id as Tab)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === item.id
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === item.id
                   ? 'bg-indigo-500/10 text-indigo-400'
                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-              }`}
+                }`}
             >
               <item.icon className="w-5 h-5" />
               {item.label}
@@ -281,7 +281,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           <div className="px-4 pb-4">
             <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
               <p className="text-xs text-slate-400 mb-2">You are viewing Demo Data.</p>
-              <button 
+              <button
                 onClick={() => setSetupMode('blank')}
                 className="w-full py-2 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded transition-colors"
               >
@@ -313,37 +313,37 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           <div>
             <h1 className="text-2xl font-bold text-white capitalize">{activeTab}</h1>
             <div className="flex items-center gap-2 mt-1">
-               <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-xs border border-indigo-500/30">14 Days Left in Trial</span>
+              <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-xs border border-indigo-500/30">14 Days Left in Trial</span>
             </div>
           </div>
-          
-          <div className="flex items-center gap-4">
-             {/* Crisis Mode Button */}
-             <button className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold rounded-full hover:bg-red-500/20 transition-colors" onClick={() => alert("Crisis Mode Activated: All players would receive an emergency push notification now.")}>
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                </span>
-                CRISIS MODE
-             </button>
 
-             <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                <span className="text-xs font-medium text-green-500">System Operational</span>
-             </div>
-             
-             {/* Header Sign Out Button (Visible on mobile/all) */}
-             <button 
-                onClick={onLogout}
-                className="md:hidden text-slate-400 hover:text-white text-sm font-medium"
-             >
-                Sign Out
-             </button>
+          <div className="flex items-center gap-4">
+            {/* Crisis Mode Button */}
+            <button className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold rounded-full hover:bg-red-500/20 transition-colors" onClick={() => alert("Crisis Mode Activated: All players would receive an emergency push notification now.")}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+              CRISIS MODE
+            </button>
+
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              <span className="text-xs font-medium text-green-500">System Operational</span>
+            </div>
+
+            {/* Header Sign Out Button (Visible on mobile/all) */}
+            <button
+              onClick={onLogout}
+              className="md:hidden text-slate-400 hover:text-white text-sm font-medium"
+            >
+              Sign Out
+            </button>
           </div>
         </header>
 
         <div className="p-8 max-w-6xl mx-auto space-y-8">
-          
+
           {/* Overview Tab Content */}
           {activeTab === 'overview' && (
             <>
@@ -368,7 +368,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
               {/* Quick Actions */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
+
                 {/* Upload Action */}
                 <div className="bg-gradient-to-br from-indigo-900/50 to-slate-900 border border-indigo-500/30 p-6 rounded-2xl relative overflow-hidden flex flex-col">
                   {setupMode === 'demo' && (
@@ -376,40 +376,39 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                       Upload your PDF/Excel itinerary here. The AI reads it to answer player questions automatically.
                     </InfoTip>
                   )}
-                  
+
                   <div className="relative z-10 flex-1">
                     <h3 className="font-bold text-white mb-2">Upload Schedule</h3>
                     <p className="text-sm text-slate-400 mb-6">
                       Drag and drop your PDF itinerary here to update the bot's knowledge base.
                     </p>
-                    
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      onChange={handleFileSelect} 
-                      className="hidden" 
+
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileSelect}
+                      className="hidden"
                       accept=".pdf,.csv,.xlsx"
                     />
-                    
+
                     {isUploading ? (
                       <div className="w-full bg-slate-800 rounded-full h-2.5 mb-2 mt-auto">
                         <div className="bg-indigo-500 h-2.5 rounded-full transition-all duration-200" style={{ width: `${uploadProgress}%` }}></div>
                         <p className="text-xs text-indigo-300 mt-2 text-center">Uploading {uploadFileName} ({uploadProgress}%)...</p>
                       </div>
                     ) : (
-                      <div 
+                      <div
                         onClick={() => fileInputRef.current?.click()}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
-                        className={`border-2 border-dashed rounded-xl h-32 flex flex-col items-center justify-center cursor-pointer transition-all group ${
-                          isDragActive 
-                            ? 'border-indigo-500 bg-indigo-500/10' 
+                        className={`border-2 border-dashed rounded-xl h-32 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragActive
+                            ? 'border-indigo-500 bg-indigo-500/10'
                             : 'border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/5'
-                        }`}
+                          }`}
                       >
                         <div className={`p-3 rounded-full mb-2 transition-transform ${isDragActive ? 'bg-indigo-500/20 scale-110' : 'bg-slate-800 group-hover:scale-110'}`}>
-                           <ZapIcon className={`w-5 h-5 ${isDragActive ? 'text-indigo-400' : 'text-indigo-400'}`} />
+                          <ZapIcon className={`w-5 h-5 ${isDragActive ? 'text-indigo-400' : 'text-indigo-400'}`} />
                         </div>
                         <span className={`text-xs font-medium ${isDragActive ? 'text-indigo-300' : 'text-slate-400 group-hover:text-indigo-300'}`}>
                           {isDragActive ? 'Drop File Here' : 'Drag & Drop or Click to Upload'}
@@ -445,28 +444,27 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   </div>
                   <span className="px-2 py-1 bg-green-900/30 text-green-400 text-[10px] uppercase font-bold rounded tracking-wider">Live</span>
                 </div>
-                
+
                 <div className="divide-y divide-slate-800/50 max-h-96 overflow-y-auto bg-slate-950/30">
                   {activityLog.length === 0 ? (
                     <div className="p-12 text-center flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-                            <BotIcon className="w-6 h-6 text-slate-600" />
-                        </div>
-                        <p className="text-slate-400 mb-2">No activity yet.</p>
-                        <p className="text-xs text-slate-500">Upload a schedule to start the engine.</p>
+                      <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                        <BotIcon className="w-6 h-6 text-slate-600" />
+                      </div>
+                      <p className="text-slate-400 mb-2">No activity yet.</p>
+                      <p className="text-xs text-slate-500">Upload a schedule to start the engine.</p>
                     </div>
                   ) : (
                     activityLog.map((log) => (
                       <div key={log.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors animate-fade-in border-l-2 border-transparent hover:border-indigo-500">
                         <div className="flex items-center gap-4">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                            log.user === 'System' ? 'bg-indigo-500/20 text-indigo-400' :
-                            log.user === 'Admin' ? 'bg-purple-500/20 text-purple-400' :
-                            'bg-slate-800 text-slate-400'
-                          }`}>
-                            {log.user === 'System' ? <BotIcon className="w-4 h-4" /> : 
-                             log.user === 'Admin' ? <ZapIcon className="w-4 h-4" /> : 
-                             log.user.charAt(0)}
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${log.user === 'System' ? 'bg-indigo-500/20 text-indigo-400' :
+                              log.user === 'Admin' ? 'bg-purple-500/20 text-purple-400' :
+                                'bg-slate-800 text-slate-400'
+                            }`}>
+                            {log.user === 'System' ? <BotIcon className="w-4 h-4" /> :
+                              log.user === 'Admin' ? <ZapIcon className="w-4 h-4" /> :
+                                log.user.charAt(0)}
                           </div>
                           <div>
                             <div className="text-sm text-white font-medium">{log.query}</div>
@@ -474,11 +472,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className={`text-xs font-medium ${
-                              log.status === 'Sent' ? 'text-purple-400' : 
-                              log.status === 'Processed' ? 'text-blue-400' : 
-                              'text-green-400'
-                          }`}>{log.status}</span>
+                          <span className={`text-xs font-medium ${log.status === 'Sent' ? 'text-purple-400' :
+                              log.status === 'Processed' ? 'text-blue-400' :
+                                'text-green-400'
+                            }`}>{log.status}</span>
                           {log.status === 'Answered' && <CheckIcon className="w-3 h-3 text-green-400" />}
                         </div>
                       </div>
@@ -489,19 +486,22 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             </>
           )}
 
-          {/* Placeholder for other tabs */}
-          {activeTab !== 'overview' && (
+          {activeTab === 'team' && (
+            <GroupLinks />
+          )}
+
+          {/* Placeholder for other tabs (Inbox, Settings) */}
+          {(activeTab === 'inbox' || activeTab === 'settings') && (
             <div className="flex flex-col items-center justify-center h-96 bg-slate-900/50 border border-slate-800 rounded-2xl border-dashed">
-               <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                  {activeTab === 'inbox' && <MessageCircleIcon className="w-8 h-8 text-slate-500" />}
-                  {activeTab === 'team' && <SmartphoneIcon className="w-8 h-8 text-slate-500" />}
-                  {activeTab === 'settings' && <ZapIcon className="w-8 h-8 text-slate-500" />}
-               </div>
-               <h3 className="text-xl font-bold text-white mb-2 capitalize">{activeTab} View</h3>
-               <p className="text-slate-400 mb-6">This module is available in the full version.</p>
-               <Button variant="outline" onClick={() => setActiveTab('overview')}>
-                 Return to Overview
-               </Button>
+              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                {activeTab === 'inbox' && <MessageCircleIcon className="w-8 h-8 text-slate-500" />}
+                {activeTab === 'settings' && <ZapIcon className="w-8 h-8 text-slate-500" />}
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2 capitalize">{activeTab} View</h3>
+              <p className="text-slate-400 mb-6">This module is available in the full version.</p>
+              <Button variant="outline" onClick={() => setActiveTab('overview')}>
+                Return to Overview
+              </Button>
             </div>
           )}
 

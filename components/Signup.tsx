@@ -10,9 +10,12 @@ interface SignupProps {
   onBack: () => void;
   onLogin: () => void;
   onSuccess: (user: User) => void;
+  selectedPlan: string;
 }
 
-const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess }) => {
+
+
+const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPlan }) => {
   const [step, setStep] = useState<'details' | 'verification' | 'payment'>('details');
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,7 +26,7 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess }) => {
     password: ''
   });
   const [verificationCode, setVerificationCode] = useState('');
-  const [selectedPayment, setSelectedPayment] = useState<'apple' | 'google' | 'card'>('card');
+
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
@@ -65,6 +68,22 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess }) => {
     setIsLoading(true);
 
     try {
+      // Check if team name exists
+      const { data: nameExists, error: nameCheckError } = await supabase.rpc('check_group_name_exists', {
+        p_name: formData.team
+      });
+
+      if (nameCheckError) {
+        console.error("Error checking team name:", nameCheckError);
+        // Fallback: proceed if check fails, or show error? Best to proceed or generic error.
+        // For now, let's assume if check fails, we might proceed and let unique constraint fail if any (but we don't have unique constraint on name yet, only join_code, but join_code is derived).
+        // Let's safe fail to allow signup.
+      } else if (nameExists) {
+        setError('Team name already taken. Please choose another.');
+        setIsLoading(false);
+        return;
+      }
+
       // 1. Sign up with Supabase
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
@@ -107,41 +126,7 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess }) => {
     }
   };
 
-  const handlePaymentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
 
-    try {
-      // Step 3: Finalize and Log In
-      // In real app, we might save payment method to Stripe here via Edge Function
-      // For now, we update the user metadata or DB record
-      const { error: updateError } = await supabase.from('users').update({
-        payment_method: selectedPayment,
-        plan: 'starter' // default
-      }).eq('email', formData.email);
-
-      if (updateError) {
-        console.warn("Could not update user metadata (likely RLS), but proceeding if auth valid.");
-      }
-
-      // Better: just fetch current user and call onSuccess
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        setIsSuccess(true);
-        setTimeout(() => {
-          onSuccess(user as any);
-        }, 2000);
-      } else {
-        setError('Session lost. Please login again.');
-      }
-    } catch (err) {
-      setError('An unexpected error occurred during checkout.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleResendCode = async () => {
     setResendStatus('sending');
@@ -165,31 +150,7 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess }) => {
     }
   };
 
-  const renderPaymentOption = (id: 'apple' | 'google' | 'card', label: string, icon: React.ReactNode) => (
-    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${selectedPayment === id
-      ? 'bg-indigo-500/10 border-indigo-500 ring-1 ring-indigo-500'
-      : 'bg-slate-900/50 border-slate-700 hover:border-slate-600'
-      }`}>
-      <input
-        type="radio"
-        name="payment"
-        value={id}
-        checked={selectedPayment === id}
-        onChange={() => setSelectedPayment(id)}
-        className="sr-only"
-      />
-      <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-4 ${selectedPayment === id ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-500 bg-transparent'
-        }`}>
-        {selectedPayment === id && <div className="w-2 h-2 rounded-full bg-white" />}
-      </div>
-      <div className="flex-1 flex items-center justify-between">
-        <span className={`font-medium ${selectedPayment === id ? 'text-white' : 'text-slate-300'}`}>{label}</span>
-        <div className={`${selectedPayment === id ? 'text-white' : 'text-slate-400'} w-6 h-6`}>
-          {icon}
-        </div>
-      </div>
-    </label>
-  );
+
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center px-6 pt-20 pb-10 bg-slate-950 relative overflow-hidden">
@@ -404,30 +365,42 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess }) => {
                 <p className="text-slate-300 mb-4">Your account is created! Please complete payment details to start your trial.</p>
               </div>
 
-              {/* We render the modal "inline" or just trigger it. 
-                    Since PaymentModal is a modal (fixed inset), let's just mount it if step is payment.
-                    We can customize PaymentModal later to be inline if needed, but for now pop-up is fine.
-                */}
               <PaymentModal
                 isOpen={true}
+                plan={selectedPlan}
                 onClose={() => {
-                  // If they close checking out, maybe we shouldn't let them? Or just log them in?
-                  // For a forced flow, we might disable close or handle success.
-                  // But PaymentModal handles success by itself? No, it calls onClose.
-                  // We need PaymentModal to tell us "success".
-                  // PaymentModal currently just calls onClose after success. 
-                  // We will rely on that.
+                  // If they back out, maybe just logout or stay here?
+                  // User cannot proceed without payment.
+                  alert("Payment is required to start the trial.");
+                }}
+                onSuccess={async () => {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (user) {
+                    // 1. Generate Join Code
+                    const teamSlug = formData.team.trim().replace(/\s+/g, '').slice(0, 10);
+                    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+                    const joinCode = `${teamSlug}-${randomSuffix}`;
 
-                  // We simulate success here:
-                  // Refetch user to check if payment processed? 
-                  // Realistically PaymentModal should take an onSuccess prop.
-                  // For now let's assume if it closes, it's done or cancelled.
-                  // But we want to redirect to dashboard.
+                    // 2. Create Group
+                    const { error: groupError } = await supabase.from('groups').insert({
+                      name: formData.team,
+                      join_code: joinCode
+                    });
 
-                  // Let's check session again
-                  supabase.auth.getUser().then(({ data }) => {
-                    if (data.user) onSuccess(data.user as any);
-                  });
+                    if (groupError) {
+                      console.error("Error creating group:", groupError);
+                      // Optionally alert or handle, but we shouldn't block signup if this fails, 
+                      // though it's critical for the bot. For now, we log and proceed.
+                    }
+
+                    // 3. Update User
+                    await supabase.from('users').update({
+                      plan: selectedPlan,
+                      subscription_status: 'trialing'
+                    }).eq('id', user.id);
+
+                    onSuccess(user as any);
+                  }
                 }}
               />
               <p className="text-xs text-slate-500">Secure payment via Stripe</p>
