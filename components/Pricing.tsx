@@ -65,7 +65,7 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
       <div className="bg-indigo-900/20 border border-indigo-500/30 rounded-full py-2 px-6 mb-16 max-w-max mx-auto flex items-center gap-2 animate-fade-in">
         <span className="text-lg">🎁</span>
         <p className="text-indigo-200 text-sm font-medium">
-          All plans include a <span className="text-white font-bold">14-day free trial</span>. No credit card required to start.
+          All plans include a <span className="text-white font-bold">14-day free trial</span>.
         </p>
       </div>
 

@@ -14,7 +14,7 @@ serve(async (req) => {
         return new Response('ok', { headers: corsHeaders })
     }
 
-    const STRIPE_SECRET_KEY = 'sk_test_51SmuhAQ1GzqUdEZwFqP4zJgAAAZc9aoUzb30jmxdGYgmktz9TZSpSYEBWR3erPbh4ADaAyOmrFZuzYvLRkK1wW2300XNv0ZN1O';
+    const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 
     if (!STRIPE_SECRET_KEY) {
         return new Response(JSON.stringify({ error: "Missing STRIPE_SECRET_KEY" }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } })
@@ -62,7 +62,7 @@ serve(async (req) => {
                 paymentIntent: paymentIntent.client_secret,
                 ephemeralKey: ephemeralKey.secret,
                 customer: customer.id,
-                publishableKey: Deno.env.get('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY') ?? "pk_test_sample",
+                publishableKey: Deno.env.get('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY') ?? "pk_live_51Smuh3LHktvXWxv0olVsHpAEIxRL0VTbHP6k9HFd7MNmYI7ZqmORLjTan8jnzkH2021crdfmqcFm1voI1fsbbRQT003cWCfR2j",
             }),
             { headers: { "Content-Type": "application/json", ...corsHeaders } },
         )

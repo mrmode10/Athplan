@@ -5,7 +5,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { supabase } from '../lib/supabase';
 
 // Helper to get the key - robust against missing env var
-const STRIPE_KEY = 'pk_test_51SmuhAQ1GzqUdEZwKyVpP4cVKagxyT0326FJpv7GhwRchYGuJdQVn9rZ6CHUmcdWSrAWRQTlDzqcZASTIsrDrHLU00vcf66qnP';
+const STRIPE_KEY = 'pk_live_51Smuh3LHktvXWxv0olVsHpAEIxRL0VTbHP6k9HFd7MNmYI7ZqmORLjTan8jnzkH2021crdfmqcFm1voI1fsbbRQT003cWCfR2j';
 const stripePromise = loadStripe(STRIPE_KEY);
 
 interface PaymentModalProps {
