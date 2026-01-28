@@ -118,6 +118,48 @@ serve(async (req) => {
                 console.log('Revenue recorded in ledger.')
             }
         }
+        else if (event.type === 'checkout.session.completed') {
+            const session = event.data.object
+            console.log(`Checkout Session completed: ${session.id}`)
+
+            // Retrieve the subscription to get details if needed, but session usually has customer
+            const customerId = session.customer
+            const plan = session.metadata?.plan || 'starter'
+            const userId = session.metadata?.user_id
+
+            if (userId && customerId) {
+                // Link Stripe Customer to Team/User
+                // Check if user has a team
+                const { data: existingUser } = await supabase.from('users').select('team_id, email').eq('id', userId).single()
+
+                if (existingUser?.team_id) {
+                    await supabase
+                        .from('teams')
+                        .update({
+                            plan: plan,
+                            subscription_status: 'active',
+                            stripe_customer_id: customerId
+                        })
+                        .eq('id', existingUser.team_id)
+                } else {
+                    // Create Team
+                    const { data: team } = await supabase
+                        .from('teams')
+                        .insert({
+                            name: `${existingUser?.email}'s Team`,
+                            stripe_customer_id: customerId,
+                            subscription_status: 'active',
+                            plan: plan
+                        })
+                        .select()
+                        .single()
+
+                    if (team) {
+                        await supabase.from('users').update({ team_id: team.id }).eq('id', userId)
+                    }
+                }
+            }
+        }
         else if (event.type === 'customer.subscription.updated') {
             const subscription = event.data.object
             const customerId = subscription.customer

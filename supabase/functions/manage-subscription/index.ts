@@ -137,12 +137,52 @@ serve(async (req) => {
 
             const subId = subscriptions.data[0].id;
 
-            // Cancel at period end
-            const updatedSub = await stripe.subscriptions.update(subId, {
-                cancel_at_period_end: true
+            return new Response(JSON.stringify({ subscription: updatedSub, message: 'Subscription set to cancel at period end.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+
+        // --- CREATE CHECKOUT SESSION (Hosted Page) ---
+        if (action === 'create_checkout_session') {
+            if (!plan) throw new Error('Plan is required')
+            const planDetails = getPlanDetails(plan)
+
+            // Create Checkout Session
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: [
+                    {
+                        price_data: {
+                            currency: 'usd',
+                            product_data: {
+                                name: planDetails.name,
+                                description: `Subscription to ${planDetails.name}`,
+                            },
+                            unit_amount: planDetails.amount,
+                            recurring: {
+                                interval: 'month',
+                            },
+                        },
+                        quantity: 1,
+                    },
+                ],
+                mode: 'subscription',
+                success_url: `${req.headers.get('origin')}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${req.headers.get('origin')}/pricing`,
+                customer: customerId || undefined, // Use existing if available, else Stripe creates new
+                customer_email: customerId ? undefined : user.email, // Pre-fill email if new
+                metadata: {
+                    user_id: user.id,
+                    plan: plan,
+                    team_id: user.user_metadata.team || user.user_metadata.team_id
+                },
+                subscription_data: {
+                    metadata: {
+                        user_id: user.id,
+                        plan: plan
+                    }
+                }
             });
 
-            return new Response(JSON.stringify({ subscription: updatedSub, message: 'Subscription set to cancel at period end.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ url: session.url }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
         }
 
         // --- CREATE SETUP INTENT (For Update Card) ---
