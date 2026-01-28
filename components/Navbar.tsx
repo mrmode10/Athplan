@@ -27,11 +27,11 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, user, onLogout, onDashboard
     e.preventDefault();
     setMobileMenuOpen(false);
     onNavigate('home');
-    
+
     setTimeout(() => {
       const targetId = href.replace('#', '');
       const element = document.getElementById(targetId);
-      
+
       if (element) {
         const navHeight = 80;
         const elementPosition = element.getBoundingClientRect().top;
@@ -52,14 +52,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, user, onLogout, onDashboard
   };
 
   return (
-    <nav 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-slate-950/80 backdrop-blur-md border-b border-slate-800 py-3' : 'bg-transparent py-5'
-      }`}
+    <nav
+      className={`fixed top-0 inset-x-0 z-[100] transition-all duration-300 ${scrolled ? 'bg-slate-950/90 backdrop-blur-md border-b border-slate-800 py-3' : 'bg-transparent py-4'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <div 
-          className="flex items-center gap-2 cursor-pointer z-50" 
+        <div
+          className="flex items-center gap-2 cursor-pointer z-50"
           onClick={goHome}
         >
           <AthplanLogo className="w-9 h-9" />
@@ -68,22 +67,22 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, user, onLogout, onDashboard
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
-          <a 
-            href="#features" 
+          <a
+            href="#features"
             onClick={(e) => scrollToSection(e, '#features')}
             className="text-sm text-slate-300 hover:text-white transition-colors"
           >
             Features
           </a>
-          <a 
-            href="#how-it-works" 
+          <a
+            href="#how-it-works"
             onClick={(e) => scrollToSection(e, '#how-it-works')}
             className="text-sm text-slate-300 hover:text-white transition-colors"
           >
             How it Works
           </a>
-          <a 
-            href="#pricing" 
+          <a
+            href="#pricing"
             onClick={(e) => scrollToSection(e, '#pricing')}
             className="text-sm text-slate-300 hover:text-white transition-colors"
           >
@@ -94,31 +93,31 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, user, onLogout, onDashboard
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center gap-4">
           {user ? (
-             <>
-               <button 
+            <>
+              <button
                 onClick={onDashboard}
                 className="text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 Dashboard
               </button>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 size="sm"
                 onClick={onLogout}
               >
                 Log Out
               </Button>
-             </>
+            </>
           ) : (
             <>
-              <button 
+              <button
                 onClick={() => onNavigate('login')}
                 className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
               >
                 Login
               </button>
-              <Button 
-                variant="primary" 
+              <Button
+                variant="primary"
                 size="sm"
                 onClick={() => onNavigate('signup')}
               >
@@ -129,7 +128,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, user, onLogout, onDashboard
         </div>
 
         {/* Mobile Menu Toggle */}
-        <button 
+        <button
           className="md:hidden z-50 text-slate-300 focus:outline-none"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
@@ -139,7 +138,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, user, onLogout, onDashboard
             </svg>
           ) : (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           )}
         </button>
@@ -147,22 +146,22 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, user, onLogout, onDashboard
         {/* Mobile Menu Overlay */}
         {mobileMenuOpen && (
           <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center space-y-8 z-40 md:hidden animate-fade-in">
-             <a 
-              href="#features" 
+            <a
+              href="#features"
               onClick={(e) => scrollToSection(e, '#features')}
               className="text-xl text-slate-300 hover:text-white"
             >
               Features
             </a>
-            <a 
-              href="#how-it-works" 
+            <a
+              href="#how-it-works"
               onClick={(e) => scrollToSection(e, '#how-it-works')}
               className="text-xl text-slate-300 hover:text-white"
             >
               How it Works
             </a>
-            <a 
-              href="#pricing" 
+            <a
+              href="#pricing"
               onClick={(e) => scrollToSection(e, '#pricing')}
               className="text-xl text-slate-300 hover:text-white"
             >
@@ -171,13 +170,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, user, onLogout, onDashboard
             <div className="w-16 h-px bg-slate-800 my-4"></div>
             {user ? (
               <>
-                <button 
+                <button
                   onClick={() => { setMobileMenuOpen(false); onDashboard(); }}
                   className="text-xl text-indigo-400 font-medium"
                 >
                   Dashboard
                 </button>
-                <button 
+                <button
                   onClick={() => { setMobileMenuOpen(false); onLogout(); }}
                   className="text-xl text-slate-400"
                 >
@@ -186,13 +185,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, user, onLogout, onDashboard
               </>
             ) : (
               <>
-                 <button 
+                <button
                   onClick={() => { setMobileMenuOpen(false); onNavigate('login'); }}
                   className="text-xl text-slate-300"
                 >
                   Login
                 </button>
-                <Button 
+                <Button
                   onClick={() => { setMobileMenuOpen(false); onNavigate('signup'); }}
                 >
                   Get Pilot Access
