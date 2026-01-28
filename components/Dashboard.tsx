@@ -5,6 +5,7 @@ import { AthplanLogo, BotIcon, MessageCircleIcon, SmartphoneIcon, ZapIcon, Check
 import { User } from '../lib/mockBackend';
 import GroupLinks from './GroupLinks';
 import Settings from './Settings';
+import { supabase } from '../lib/supabase';
 
 interface DashboardProps {
   user: User;
@@ -59,6 +60,24 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [uploadFileName, setUploadFileName] = useState('');
   const [isDragActive, setIsDragActive] = useState(false);
 
+  // Persistence Check
+  useEffect(() => {
+    // Check if user has a saved preference in metadata
+    // We access raw metadata from the user object if available, or just trust the state passed down
+    // Since 'user' prop maps from Supabase session, we might need to check the session again or rely on the prop if it includes metadata
+    if ((user as any).setup_mode) {
+      setSetupMode((user as any).setup_mode);
+    }
+  }, [user]);
+
+  const handleSetSetupMode = async (mode: SetupMode) => {
+    setSetupMode(mode);
+    // Persist to Supabase
+    await supabase.auth.updateUser({
+      data: { setup_mode: mode }
+    });
+  };
+
   // Broadcast Message State
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
   const [broadcastMessage, setBroadcastMessage] = useState('');
@@ -70,10 +89,35 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       setActivityLog(DEMO_LOGS);
       setStats({ queries: 24, activePlayers: 18, timeSaved: 1.5 });
     } else if (setupMode === 'blank') {
-      setActivityLog([]);
+      // Mock stats for blank
       setStats({ queries: 0, activePlayers: 0, timeSaved: 0 });
+      // Fetch real logs
+      fetchActivityLogs();
     }
   }, [setupMode]);
+
+  const fetchActivityLogs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (data) {
+        // Map DB columns to UI shape if needed or ensure they match
+        setActivityLog(data.map(log => ({
+          id: log.id,
+          time: new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          user: log.user_name || 'User',
+          query: log.query,
+          status: log.status
+        })));
+      }
+    } catch (e) {
+      console.error('Failed to fetch logs', e);
+    }
+  };
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: BotIcon },
@@ -190,7 +234,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Option 1: Demo */}
               <button
-                onClick={() => setSetupMode('demo')}
+                onClick={() => handleSetSetupMode('demo')}
                 className="group p-6 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-indigo-500 hover:bg-slate-800 transition-all text-left"
               >
                 <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition-transform">
@@ -204,7 +248,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
               {/* Option 2: Blank */}
               <button
-                onClick={() => setSetupMode('blank')}
+                onClick={() => handleSetSetupMode('blank')}
                 className="group p-6 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-green-500 hover:bg-slate-800 transition-all text-left"
               >
                 <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center text-green-400 mb-4 group-hover:scale-110 transition-transform">

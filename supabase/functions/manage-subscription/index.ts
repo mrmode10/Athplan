@@ -123,6 +123,28 @@ serve(async (req) => {
             return new Response(JSON.stringify({ success: true, plan: plan }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
         }
 
+        // --- CANCEL SUBSCRIPTION ---
+        if (action === 'cancel_subscription') {
+            const subscriptions = await stripe.subscriptions.list({
+                customer: customerId,
+                status: 'active',
+                limit: 1
+            });
+
+            if (subscriptions.data.length === 0) {
+                throw new Error('No active subscription found to cancel.');
+            }
+
+            const subId = subscriptions.data[0].id;
+
+            // Cancel at period end
+            const updatedSub = await stripe.subscriptions.update(subId, {
+                cancel_at_period_end: true
+            });
+
+            return new Response(JSON.stringify({ subscription: updatedSub, message: 'Subscription set to cancel at period end.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+
         // --- CREATE SETUP INTENT (For Update Card) ---
         if (action === 'create_setup_intent') {
             const setupIntent = await stripe.setupIntents.create({

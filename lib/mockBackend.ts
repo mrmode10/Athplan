@@ -7,6 +7,7 @@ export interface User {
   team: string;
   plan: 'starter' | 'all-star' | 'hall-of-fame' | 'pilot';
   paymentMethod?: 'apple' | 'google' | 'card';
+  setup_mode?: 'undecided' | 'demo' | 'blank';
 }
 
 const DELAY = 800; // Simulate network latency
@@ -23,7 +24,7 @@ export const mockBackend = {
     return new Promise((resolve) => {
       setTimeout(() => {
         const users = JSON.parse(localStorage.getItem('athplan_users') || '[]');
-        
+
         // Check if email exists
         if (users.find((u: any) => u.email === data.email)) {
           resolve({ success: false, message: 'Email already exists' });
@@ -36,7 +37,7 @@ export const mockBackend = {
           id: Math.random().toString(36).substr(2, 9),
           plan: 'pilot'
         }));
-        
+
         resolve({ success: true });
       }, DELAY);
     });
@@ -71,8 +72,8 @@ export const mockBackend = {
       setTimeout(() => {
         const pending = localStorage.getItem('athplan_pending_signup');
         if (!pending) {
-            resolve({ success: false });
-            return;
+          resolve({ success: false });
+          return;
         }
 
         const newUser = JSON.parse(pending);
@@ -82,7 +83,7 @@ export const mockBackend = {
         const users = JSON.parse(localStorage.getItem('athplan_users') || '[]');
         users.push(newUser);
         localStorage.setItem('athplan_users', JSON.stringify(users));
-        
+
         // Set Session
         localStorage.setItem('athplan_session', JSON.stringify(newUser));
         localStorage.removeItem('athplan_pending_signup');
@@ -133,12 +134,12 @@ export const mockBackend = {
           team: 'Example Team',
           plan: 'pilot'
         };
-        
+
         // Save to "Database" if not exists (simplified logic)
         const users = JSON.parse(localStorage.getItem('athplan_users') || '[]');
         if (!users.find((u: any) => u.email === mockGoogleUser.email)) {
-           users.push({ ...mockGoogleUser, password: 'google_auth_placeholder' });
-           localStorage.setItem('athplan_users', JSON.stringify(users));
+          users.push({ ...mockGoogleUser, password: 'google_auth_placeholder' });
+          localStorage.setItem('athplan_users', JSON.stringify(users));
         }
 
         localStorage.setItem('athplan_session', JSON.stringify(mockGoogleUser));

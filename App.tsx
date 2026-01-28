@@ -25,6 +25,7 @@ const mapSupabaseUser = (user: any): User => ({
     lastName: user.user_metadata?.last_name || '',
     team: user.user_metadata?.team || '',
     plan: user.user_metadata?.plan || 'starter',
+    setup_mode: user.user_metadata?.setup_mode,
 });
 
 const App: React.FC = () => {
@@ -66,7 +67,7 @@ const App: React.FC = () => {
     if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Loading...</div>;
 
     return (
-        <div className="bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-50 font-sans selection:bg-indigo-500/30">
+        <div className={`min-h-screen font-sans selection:bg-indigo-500/30 ${currentView !== 'dashboard' ? 'dark' : ''} bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50`}>
 
             {/* Navbar is global, but behavior changes based on view */}
             {currentView !== 'dashboard' && (
