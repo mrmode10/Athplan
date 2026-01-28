@@ -92,7 +92,7 @@ serve(async (req) => {
                 await supabase.from('users').update({ team_id: teamId }).eq('id', userId)
             }
 
-            // 4. Update Voiceflow (if Voiceflow User ID is present)
+            // 4. Update Voiceflow
             const voiceflowUserId = paymentIntent.metadata.voiceflow_user_id
             if (voiceflowUserId) {
                 try {
@@ -117,6 +117,44 @@ serve(async (req) => {
             } else {
                 console.log('Revenue recorded in ledger.')
             }
+        }
+        else if (event.type === 'customer.subscription.updated') {
+            const subscription = event.data.object
+            const customerId = subscription.customer
+            const plan = subscription.metadata.plan
+            const status = subscription.status
+
+            if (customerId) {
+                console.log(`Subscription updated for customer ${customerId}: Plan=${plan}, Status=${status}`)
+
+                // Update Team
+                await supabase
+                    .from('teams')
+                    .update({
+                        plan: plan,
+                        subscription_status: status
+                    })
+                    .eq('stripe_customer_id', customerId)
+
+                // Ideally we also update Users in that team
+                // But for now we rely on the primary user link via team
+            }
+        }
+        else if (event.type === 'customer.subscription.deleted') {
+            const subscription = event.data.object
+            const customerId = subscription.customer
+
+            console.log(`Subscription canceled for customer ${customerId}`)
+
+            await supabase
+                .from('teams')
+                .update({
+                    subscription_status: 'canceled',
+                    // Optionally downgrade plan to 'starter' or keep 'pro' until period end? 
+                    // 'deleted' usually means period end passed or immediate cancel.
+                    plan: 'starter'
+                })
+                .eq('stripe_customer_id', customerId)
         }
 
         return new Response(JSON.stringify({ received: true }), { headers: { 'Content-Type': 'application/json' } })

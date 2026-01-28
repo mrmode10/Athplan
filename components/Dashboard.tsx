@@ -4,6 +4,7 @@ import Button from './Button';
 import { AthplanLogo, BotIcon, MessageCircleIcon, SmartphoneIcon, ZapIcon, CheckIcon, XIcon, ArrowRightIcon } from './icons/Icons';
 import { User } from '../lib/mockBackend';
 import GroupLinks from './GroupLinks';
+import Settings from './Settings';
 
 interface DashboardProps {
   user: User;
@@ -175,7 +176,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row relative overflow-hidden transition-colors duration-300">
 
       {/* --- ONBOARDING MODAL --- */}
       {setupMode === 'undecided' && (
@@ -255,10 +256,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       )}
 
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
-        <div className="p-6 flex items-center gap-3 border-b border-slate-800">
+      <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 transition-colors duration-300">
+        <div className="p-6 flex items-center gap-3 border-b border-slate-200 dark:border-slate-800">
           <AthplanLogo className="w-8 h-8" />
-          <span className="font-bold text-lg text-white">Athplan</span>
+          <span className="font-bold text-lg text-slate-900 dark:text-white">Athplan</span>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -267,8 +268,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               key={item.id}
               onClick={() => setActiveTab(item.id as Tab)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === item.id
-                  ? 'bg-indigo-500/10 text-indigo-400'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                 }`}
             >
               <item.icon className="w-5 h-5" />
@@ -297,7 +298,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               {user.firstName.charAt(0)}{user.lastName.charAt(0)}
             </div>
             <div className="flex-1 overflow-hidden">
-              <div className="text-sm font-medium text-white truncate">{user.firstName} {user.lastName}</div>
+              <div className="text-sm font-medium text-slate-900 dark:text-white truncate">{user.firstName} {user.lastName}</div>
               <div className="text-xs text-slate-500 truncate">{user.team}</div>
             </div>
           </div>
@@ -309,9 +310,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto h-screen relative">
-        <header className="bg-slate-950 border-b border-slate-800 py-6 px-8 flex justify-between items-center sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md">
+        <header className="bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 py-6 px-8 flex justify-between items-center sticky top-0 z-40 backdrop-blur-md transition-colors duration-300">
           <div>
-            <h1 className="text-2xl font-bold text-white capitalize">{activeTab}</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white capitalize">{activeTab}</h1>
             <div className="flex items-center gap-2 mt-1">
               <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-xs border border-indigo-500/30">14 Days Left in Trial</span>
             </div>
@@ -349,20 +350,20 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             <>
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-                  <div className="text-slate-400 text-sm font-medium mb-2">Queries Today</div>
-                  <div className="text-3xl font-bold text-white">{stats.queries}</div>
-                  {setupMode === 'demo' && <div className="mt-2 text-xs text-green-400">↑ 12% vs yesterday</div>}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl transition-colors duration-300">
+                  <div className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-2">Queries Today</div>
+                  <div className="text-3xl font-bold text-slate-900 dark:text-white">{stats.queries}</div>
+                  {setupMode === 'demo' && <div className="mt-2 text-xs text-green-500 dark:text-green-400">↑ 12% vs yesterday</div>}
                 </div>
-                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-                  <div className="text-slate-400 text-sm font-medium mb-2">Active Players</div>
-                  <div className="text-3xl font-bold text-white">{stats.activePlayers}</div>
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl transition-colors duration-300">
+                  <div className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-2">Active Players</div>
+                  <div className="text-3xl font-bold text-slate-900 dark:text-white">{stats.activePlayers}</div>
                   {setupMode === 'demo' && <div className="mt-2 text-xs text-slate-500">Out of 23 rostered</div>}
                 </div>
-                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-                  <div className="text-slate-400 text-sm font-medium mb-2">Time Saved</div>
-                  <div className="text-3xl font-bold text-white">{stats.timeSaved.toFixed(1)} hrs</div>
-                  {setupMode === 'demo' && <div className="mt-2 text-xs text-indigo-400">This week so far</div>}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl transition-colors duration-300">
+                  <div className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-2">Time Saved</div>
+                  <div className="text-3xl font-bold text-slate-900 dark:text-white">{stats.timeSaved.toFixed(1)} hrs</div>
+                  {setupMode === 'demo' && <div className="mt-2 text-xs text-indigo-500 dark:text-indigo-400">This week so far</div>}
                 </div>
               </div>
 
@@ -370,7 +371,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 {/* Upload Action */}
-                <div className="bg-gradient-to-br from-indigo-900/50 to-slate-900 border border-indigo-500/30 p-6 rounded-2xl relative overflow-hidden flex flex-col">
+                <div className="bg-gradient-to-br from-indigo-500/10 to-slate-50 dark:from-indigo-900/50 dark:to-slate-900 border border-indigo-200 dark:border-indigo-500/30 p-6 rounded-2xl relative overflow-hidden flex flex-col transition-colors duration-300">
                   {setupMode === 'demo' && (
                     <InfoTip title="Feed the Brain">
                       Upload your PDF/Excel itinerary here. The AI reads it to answer player questions automatically.
@@ -378,7 +379,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   )}
 
                   <div className="relative z-10 flex-1">
-                    <h3 className="font-bold text-white mb-2">Upload Schedule</h3>
+                    <h3 className="font-bold text-slate-900 dark:text-white mb-2">Upload Schedule</h3>
                     <p className="text-sm text-slate-400 mb-6">
                       Drag and drop your PDF itinerary here to update the bot's knowledge base.
                     </p>
@@ -397,117 +398,119 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                         <p className="text-xs text-indigo-300 mt-2 text-center">Uploading {uploadFileName} ({uploadProgress}%)...</p>
                       </div>
                     ) : (
-                      <div
-                        onClick={() => fileInputRef.current?.click()}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        className={`border-2 border-dashed rounded-xl h-32 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragActive
-                            ? 'border-indigo-500 bg-indigo-500/10'
-                            : 'border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/5'
-                          }`}
+                      onClick = {() => fileInputRef.current?.click()}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`border-2 border-dashed rounded-xl h-32 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragActive
+                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
+                      : 'border-slate-300 dark:border-slate-700 hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-indigo-500/5'
+                      }`}
                       >
-                        <div className={`p-3 rounded-full mb-2 transition-transform ${isDragActive ? 'bg-indigo-500/20 scale-110' : 'bg-slate-800 group-hover:scale-110'}`}>
-                          <ZapIcon className={`w-5 h-5 ${isDragActive ? 'text-indigo-400' : 'text-indigo-400'}`} />
-                        </div>
-                        <span className={`text-xs font-medium ${isDragActive ? 'text-indigo-300' : 'text-slate-400 group-hover:text-indigo-300'}`}>
-                          {isDragActive ? 'Drop File Here' : 'Drag & Drop or Click to Upload'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Broadcast Action */}
-                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col">
-                  {setupMode === 'demo' && (
-                    <InfoTip title="Mass Alerts">
-                      Send a message to everyone's WhatsApp at once. Great for last-minute changes.
-                    </InfoTip>
-                  )}
-                  <h3 className="font-bold text-white mb-2">Broadcast Message</h3>
-                  <p className="text-sm text-slate-400 mb-6">Send a push notification to all {stats.activePlayers > 0 ? stats.activePlayers : 'rostered'} active players on WhatsApp.</p>
-                  <div className="mt-auto">
-                    <Button variant="secondary" size="sm" className="w-full justify-between group" onClick={() => setShowBroadcastModal(true)}>
-                      Draft Message <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Activity Feed Simulation */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900">
-                  <div>
-                    <h3 className="font-bold text-white">Live Activity Log</h3>
-                    <p className="text-xs text-slate-500 mt-1">Real-time interactions between players and the AI.</p>
-                  </div>
-                  <span className="px-2 py-1 bg-green-900/30 text-green-400 text-[10px] uppercase font-bold rounded tracking-wider">Live</span>
-                </div>
-
-                <div className="divide-y divide-slate-800/50 max-h-96 overflow-y-auto bg-slate-950/30">
-                  {activityLog.length === 0 ? (
-                    <div className="p-12 text-center flex flex-col items-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-                        <BotIcon className="w-6 h-6 text-slate-600" />
-                      </div>
-                      <p className="text-slate-400 mb-2">No activity yet.</p>
-                      <p className="text-xs text-slate-500">Upload a schedule to start the engine.</p>
+                    <div className={`p-3 rounded-full mb-2 transition-transform ${isDragActive ? 'bg-indigo-500/20 scale-110' : 'bg-slate-100 dark:bg-slate-800 group-hover:scale-110'}`}>
+                      <ZapIcon className={`w-5 h-5 ${isDragActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-indigo-600 dark:text-indigo-400'}`} />
                     </div>
-                  ) : (
-                    activityLog.map((log) => (
-                      <div key={log.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors animate-fade-in border-l-2 border-transparent hover:border-indigo-500">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${log.user === 'System' ? 'bg-indigo-500/20 text-indigo-400' :
-                              log.user === 'Admin' ? 'bg-purple-500/20 text-purple-400' :
-                                'bg-slate-800 text-slate-400'
-                            }`}>
-                            {log.user === 'System' ? <BotIcon className="w-4 h-4" /> :
-                              log.user === 'Admin' ? <ZapIcon className="w-4 h-4" /> :
-                                log.user.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="text-sm text-white font-medium">{log.query}</div>
-                            <div className="text-xs text-slate-500">{log.user} • {log.time}</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-medium ${log.status === 'Sent' ? 'text-purple-400' :
-                              log.status === 'Processed' ? 'text-blue-400' :
-                                'text-green-400'
-                            }`}>{log.status}</span>
-                          {log.status === 'Answered' && <CheckIcon className="w-3 h-3 text-green-400" />}
-                        </div>
-                      </div>
-                    ))
-                  )}
+                    <span className={`text-xs font-medium ${isDragActive ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300'}`}>
+                      {isDragActive ? 'Drop File Here' : 'Drag & Drop or Click to Upload'}
+                    </span>
+                  </div>
+                    )}
                 </div>
               </div>
-            </>
-          )}
 
-          {activeTab === 'team' && (
-            <GroupLinks />
-          )}
-
-          {/* Placeholder for other tabs (Inbox, Settings) */}
-          {(activeTab === 'inbox' || activeTab === 'settings') && (
-            <div className="flex flex-col items-center justify-center h-96 bg-slate-900/50 border border-slate-800 rounded-2xl border-dashed">
-              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                {activeTab === 'inbox' && <MessageCircleIcon className="w-8 h-8 text-slate-500" />}
-                {activeTab === 'settings' && <ZapIcon className="w-8 h-8 text-slate-500" />}
+              {/* Broadcast Action */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col transition-colors duration-300">
+                {setupMode === 'demo' && (
+                  <InfoTip title="Mass Alerts">
+                    Send a message to everyone's WhatsApp at once. Great for last-minute changes.
+                  </InfoTip>
+                )}
+                <h3 className="font-bold text-slate-900 dark:text-white mb-2">Broadcast Message</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Send a push notification to all {stats.activePlayers > 0 ? stats.activePlayers : 'rostered'} active players on WhatsApp.</p>
+                <div className="mt-auto">
+                  <Button variant="secondary" size="sm" className="w-full justify-between group" onClick={() => setShowBroadcastModal(true)}>
+                    Draft Message <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2 capitalize">{activeTab} View</h3>
-              <p className="text-slate-400 mb-6">This module is available in the full version.</p>
-              <Button variant="outline" onClick={() => setActiveTab('overview')}>
-                Return to Overview
-              </Button>
             </div>
+
+          {/* Activity Feed Simulation */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-colors duration-300">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 transition-colors duration-300">
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-white">Live Activity Log</h3>
+                <p className="text-xs text-slate-500 mt-1">Real-time interactions between players and the AI.</p>
+              </div>
+              <span className="px-2 py-1 bg-green-900/30 text-green-400 text-[10px] uppercase font-bold rounded tracking-wider">Live</span>
+            </div>
+
+            <div className="divide-y divide-slate-100 dark:divide-slate-800/50 max-h-96 overflow-y-auto bg-slate-50 dark:bg-slate-950/30 transition-colors duration-300">
+              {activityLog.length === 0 ? (
+                <div className="p-12 text-center flex flex-col items-center">
+                  <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                    <BotIcon className="w-6 h-6 text-slate-400 dark:text-slate-600" />
+                  </div>
+                  <p className="text-slate-400 mb-2">No activity yet.</p>
+                  <p className="text-xs text-slate-500">Upload a schedule to start the engine.</p>
+                </div>
+              ) : (
+                activityLog.map((log) => (
+                  <div key={log.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors animate-fade-in border-l-2 border-transparent hover:border-indigo-500">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${log.user === 'System' ? 'bg-indigo-500/20 text-indigo-400' :
+                        log.user === 'Admin' ? 'bg-purple-500/20 text-purple-400' :
+                          'bg-slate-800 text-slate-400'
+                        }`}>
+                        {log.user === 'System' ? <BotIcon className="w-4 h-4" /> :
+                          log.user === 'Admin' ? <ZapIcon className="w-4 h-4" /> :
+                            log.user.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="text-sm text-white font-medium">{log.query}</div>
+                        <div className="text-xs text-slate-500">{log.user} • {log.time}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-medium ${log.status === 'Sent' ? 'text-purple-500 dark:text-purple-400' :
+                        log.status === 'Processed' ? 'text-blue-500 dark:text-blue-400' :
+                          'text-green-500 dark:text-green-400'
+                        }`}>{log.status}</span>
+                      {log.status === 'Answered' && <CheckIcon className="w-3 h-3 text-green-400" />}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </>
           )}
 
-        </div>
-      </main>
+        {activeTab === 'team' && (
+          <GroupLinks />
+        )}
+
+        {activeTab === 'settings' && (
+          <Settings />
+        )}
+
+        {/* Placeholder for other tabs (Inbox) */}
+        {activeTab === 'inbox' && (
+          <div className="flex flex-col items-center justify-center h-96 bg-slate-900/50 border border-slate-800 rounded-2xl border-dashed">
+            <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+              <MessageCircleIcon className="w-8 h-8 text-slate-500" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2 capitalize">{activeTab} View</h3>
+            <p className="text-slate-400 mb-6">This module is available in the full version.</p>
+            <Button variant="outline" onClick={() => setActiveTab('overview')}>
+              Return to Overview
+            </Button>
+          </div>
+        )}
+
     </div>
+      </main >
+    </div >
   );
 };
 
