@@ -131,6 +131,15 @@ const Settings: React.FC = () => {
                                         <h4 className="text-lg font-bold text-slate-900 dark:text-white">{planName}</h4>
                                         <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">${(PLAN_CONFIG[planName].amount / 100).toFixed(0)}/mo</p>
 
+                                        <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-2 mb-6">
+                                            {(PLAN_CONFIG[planName] as any).features?.map((feature: string, i: number) => (
+                                                <li key={i} className="flex items-start gap-2">
+                                                    <span className="text-indigo-500 mt-0.5">•</span>
+                                                    <span>{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+
                                         {isCurrent ? (
                                             <button disabled className="w-full py-2 rounded-lg bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-sm font-bold cursor-default">Current Plan</button>
                                         ) : (
