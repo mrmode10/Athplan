@@ -20,28 +20,14 @@ interface SubscriptionDetails {
 }
 
 const Settings: React.FC = () => {
-    // Theme state
-    const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-
     // Subscription state
     const [loading, setLoading] = useState(true);
     const [subDetails, setSubDetails] = useState<SubscriptionDetails | null>(null);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [paymentModalMode, setPaymentModalMode] = useState<'payment' | 'setup'>('payment');
 
-    // Load theme from local storage on mount
+    // Load subscription on mount
     useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-        const initialTheme = savedTheme || 'dark'; // Default to dark if not set
-        setTheme(initialTheme);
-
-        // Apply to document
-        if (initialTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-
         fetchSubscription();
     }, []);
 
@@ -64,17 +50,7 @@ const Settings: React.FC = () => {
         }
     };
 
-    const toggleTheme = () => {
-        const newTheme = theme === 'light' ? 'dark' : 'light';
-        setTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
 
-        if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    };
 
     const handleUpdatePaymentMethod = () => {
         setPaymentModalMode('setup');
@@ -105,27 +81,6 @@ const Settings: React.FC = () => {
 
     return (
         <div className="space-y-6 animate-fade-in pb-10">
-            {/* Appearance Section */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors duration-300">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Appearance</h3>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h4 className="font-medium text-slate-700 dark:text-slate-200">Theme Preference</h4>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Choose how the dashboard looks to you.</p>
-                    </div>
-
-                    <button
-                        onClick={toggleTheme}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-900 ${theme === 'dark' ? 'bg-indigo-600' : 'bg-slate-300'}`}
-                    >
-                        <span className="sr-only">Toggle theme</span>
-                        <span
-                            className={`${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                        />
-                    </button>
-                </div>
-            </div>
-
             {/* Subscription Section */}
             {/* Note: Subscription UI usually looks good with dark usage even in light mode for contrast, but let's adapt it somewhat */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors duration-300">

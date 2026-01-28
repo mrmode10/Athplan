@@ -67,7 +67,7 @@ const App: React.FC = () => {
     if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Loading...</div>;
 
     return (
-        <div className={`min-h-screen font-sans selection:bg-indigo-500/30 ${currentView !== 'dashboard' ? 'dark' : ''} bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50`}>
+        <div className="min-h-screen font-sans selection:bg-indigo-500/30 dark bg-slate-950 text-slate-50">
 
             {/* Navbar is global, but behavior changes based on view */}
             {currentView !== 'dashboard' && (
