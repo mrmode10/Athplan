@@ -4,32 +4,33 @@ export const PLAN_CONFIG = {
         name: 'Starter Pack',
         amount: 9900,
         features: [
-            'Up to 50 active players',
-            'Basic AI Auto-Replies',
-            'PDF/Excel Schedule Upload',
-            'Email Support'
+            'Up to 8 Users',
+            'WhatsApp Native Interface',
+            'Instant Schedule Answers',
+            'Standard Email Support',
+            'Basic Itinerary Parsing'
         ]
     },
     'All Star': {
         name: 'All Star',
         amount: 19900,
         features: [
-            'Unlimited players',
-            'Advanced AI Reasoning',
-            'Calendar & Flight Sync',
+            'Up to 20 Users',
+            'Everything in Starter',
             'Priority Support',
-            'Usage Analytics'
+            'Travel Logistics Module',
+            'Multi-admin access'
         ]
     },
     'Hall of Fame': {
         name: 'Hall of Fame',
         amount: 24900,
         features: [
+            'Up to 30 Users',
             'Everything in All Star',
-            'Custom Integrations',
-            'Dedicated Account Manager',
-            'White-glove Onboarding',
-            'SLA Guarantee'
+            '24/7 AI Troubleshoot Support',
+            'Advanced Analytics Dashboard',
+            'Custom Hotel & Bus Integrations'
         ]
     }
 };

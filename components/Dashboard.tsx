@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 interface DashboardProps {
   user: User;
   onLogout: () => void;
+  onHome: () => void;
 }
 
 type Tab = 'overview' | 'inbox' | 'team' | 'settings';
@@ -45,7 +46,7 @@ const InfoTip: React.FC<{ title: string; children: React.ReactNode }> = ({ title
   </div>
 );
 
-const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
+const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [setupMode, setSetupMode] = useState<SetupMode>('undecided');
 
@@ -301,7 +302,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 transition-colors duration-300">
-        <div className="p-6 flex items-center gap-3 border-b border-slate-200 dark:border-slate-800">
+        <div className="p-6 flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" onClick={onHome}>
           <AthplanLogo className="w-8 h-8" />
           <span className="font-bold text-lg text-slate-900 dark:text-white">Athplan</span>
         </div>

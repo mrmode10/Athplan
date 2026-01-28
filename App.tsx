@@ -133,6 +133,7 @@ const App: React.FC = () => {
                 <Dashboard
                     user={user}
                     onLogout={handleLogout}
+                    onHome={() => setCurrentView('home')}
                 />
             )}
 
