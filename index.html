@@ -46,12 +46,26 @@
         const checkoutButton = document.getElementById('checkout-button');
 
         checkoutButton.addEventListener('click', function () {
+            // Get Session from LocalStorage
+            const sessionStr = localStorage.getItem('sb-ppjzhesecvagtwfbvoek-auth-token');
+            if (!sessionStr) {
+                alert('You must be logged in to test subscription!');
+                window.location.href = '/login';
+                return;
+            }
+            const session = JSON.parse(sessionStr);
+            const token = session.access_token;
+
+            checkoutButton.innerText = "Processing...";
+            checkoutButton.disabled = true;
+
             // Call Supabase Function
             fetch('https://ppjzhesecvagtwfbvoek.supabase.co/functions/v1/manage-subscription', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwanpoZXNlY3ZhZ3R3ZmJ2b2VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzMDcwNjMsImV4cCI6MjA4Mzg4MzA2M30.lUZK27-YY-JiJg7PG7Mw8IRjr25icBQHlyFgx1qJ_d4'
+                    // Use Real User Token
+                    'Authorization': 'Bearer ' + token
                 },
                 body: JSON.stringify({
                     action: 'create_checkout_session',
