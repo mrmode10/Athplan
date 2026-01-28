@@ -398,117 +398,118 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                         <p className="text-xs text-indigo-300 mt-2 text-center">Uploading {uploadFileName} ({uploadProgress}%)...</p>
                       </div>
                     ) : (
-                      onClick = {() => fileInputRef.current?.click()}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    className={`border-2 border-dashed rounded-xl h-32 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragActive
-                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
-                      : 'border-slate-300 dark:border-slate-700 hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-indigo-500/5'
-                      }`}
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={`border-2 border-dashed rounded-xl h-32 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragActive
+                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
+                          : 'border-slate-300 dark:border-slate-700 hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-indigo-500/5'
+                          }`}
                       >
-                    <div className={`p-3 rounded-full mb-2 transition-transform ${isDragActive ? 'bg-indigo-500/20 scale-110' : 'bg-slate-100 dark:bg-slate-800 group-hover:scale-110'}`}>
-                      <ZapIcon className={`w-5 h-5 ${isDragActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-indigo-600 dark:text-indigo-400'}`} />
-                    </div>
-                    <span className={`text-xs font-medium ${isDragActive ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300'}`}>
-                      {isDragActive ? 'Drop File Here' : 'Drag & Drop or Click to Upload'}
-                    </span>
-                  </div>
+                        <div className={`p-3 rounded-full mb-2 transition-transform ${isDragActive ? 'bg-indigo-500/20 scale-110' : 'bg-slate-100 dark:bg-slate-800 group-hover:scale-110'}`}>
+                          <ZapIcon className={`w-5 h-5 ${isDragActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-indigo-600 dark:text-indigo-400'}`} />
+                        </div>
+                        <span className={`text-xs font-medium ${isDragActive ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300'}`}>
+                          {isDragActive ? 'Drop File Here' : 'Drag & Drop or Click to Upload'}
+                        </span>
+                      </div>
                     )}
-                </div>
-              </div>
-
-              {/* Broadcast Action */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col transition-colors duration-300">
-                {setupMode === 'demo' && (
-                  <InfoTip title="Mass Alerts">
-                    Send a message to everyone's WhatsApp at once. Great for last-minute changes.
-                  </InfoTip>
-                )}
-                <h3 className="font-bold text-slate-900 dark:text-white mb-2">Broadcast Message</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Send a push notification to all {stats.activePlayers > 0 ? stats.activePlayers : 'rostered'} active players on WhatsApp.</p>
-                <div className="mt-auto">
-                  <Button variant="secondary" size="sm" className="w-full justify-between group" onClick={() => setShowBroadcastModal(true)}>
-                    Draft Message <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-          {/* Activity Feed Simulation */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-colors duration-300">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 transition-colors duration-300">
-              <div>
-                <h3 className="font-bold text-slate-900 dark:text-white">Live Activity Log</h3>
-                <p className="text-xs text-slate-500 mt-1">Real-time interactions between players and the AI.</p>
-              </div>
-              <span className="px-2 py-1 bg-green-900/30 text-green-400 text-[10px] uppercase font-bold rounded tracking-wider">Live</span>
-            </div>
-
-            <div className="divide-y divide-slate-100 dark:divide-slate-800/50 max-h-96 overflow-y-auto bg-slate-50 dark:bg-slate-950/30 transition-colors duration-300">
-              {activityLog.length === 0 ? (
-                <div className="p-12 text-center flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-                    <BotIcon className="w-6 h-6 text-slate-400 dark:text-slate-600" />
                   </div>
-                  <p className="text-slate-400 mb-2">No activity yet.</p>
-                  <p className="text-xs text-slate-500">Upload a schedule to start the engine.</p>
                 </div>
-              ) : (
-                activityLog.map((log) => (
-                  <div key={log.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors animate-fade-in border-l-2 border-transparent hover:border-indigo-500">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${log.user === 'System' ? 'bg-indigo-500/20 text-indigo-400' :
-                        log.user === 'Admin' ? 'bg-purple-500/20 text-purple-400' :
-                          'bg-slate-800 text-slate-400'
-                        }`}>
-                        {log.user === 'System' ? <BotIcon className="w-4 h-4" /> :
-                          log.user === 'Admin' ? <ZapIcon className="w-4 h-4" /> :
-                            log.user.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="text-sm text-white font-medium">{log.query}</div>
-                        <div className="text-xs text-slate-500">{log.user} • {log.time}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs font-medium ${log.status === 'Sent' ? 'text-purple-500 dark:text-purple-400' :
-                        log.status === 'Processed' ? 'text-blue-500 dark:text-blue-400' :
-                          'text-green-500 dark:text-green-400'
-                        }`}>{log.status}</span>
-                      {log.status === 'Answered' && <CheckIcon className="w-3 h-3 text-green-400" />}
-                    </div>
+
+                {/* Broadcast Action */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col transition-colors duration-300">
+                  {setupMode === 'demo' && (
+                    <InfoTip title="Mass Alerts">
+                      Send a message to everyone's WhatsApp at once. Great for last-minute changes.
+                    </InfoTip>
+                  )}
+                  <h3 className="font-bold text-slate-900 dark:text-white mb-2">Broadcast Message</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Send a push notification to all {stats.activePlayers > 0 ? stats.activePlayers : 'rostered'} active players on WhatsApp.</p>
+                  <div className="mt-auto">
+                    <Button variant="secondary" size="sm" className="w-full justify-between group" onClick={() => setShowBroadcastModal(true)}>
+                      Draft Message <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-        </>
+                </div>
+              </div>
+
+              {/* Activity Feed Simulation */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-colors duration-300">
+                <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 transition-colors duration-300">
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-white">Live Activity Log</h3>
+                    <p className="text-xs text-slate-500 mt-1">Real-time interactions between players and the AI.</p>
+                  </div>
+                  <span className="px-2 py-1 bg-green-900/30 text-green-400 text-[10px] uppercase font-bold rounded tracking-wider">Live</span>
+                </div>
+
+                <div className="divide-y divide-slate-100 dark:divide-slate-800/50 max-h-96 overflow-y-auto bg-slate-50 dark:bg-slate-950/30 transition-colors duration-300">
+                  {activityLog.length === 0 ? (
+                    <div className="p-12 text-center flex flex-col items-center">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                        <BotIcon className="w-6 h-6 text-slate-400 dark:text-slate-600" />
+                      </div>
+                      <p className="text-slate-400 mb-2">No activity yet.</p>
+                      <p className="text-xs text-slate-500">Upload a schedule to start the engine.</p>
+                    </div>
+                  ) : (
+                    activityLog.map((log) => (
+                      <div key={log.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors animate-fade-in border-l-2 border-transparent hover:border-indigo-500">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${log.user === 'System' ? 'bg-indigo-500/20 text-indigo-400' :
+                            log.user === 'Admin' ? 'bg-purple-500/20 text-purple-400' :
+                              'bg-slate-800 text-slate-400'
+                            }`}>
+                            {log.user === 'System' ? <BotIcon className="w-4 h-4" /> :
+                              log.user === 'Admin' ? <ZapIcon className="w-4 h-4" /> :
+                                log.user.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="text-sm text-white font-medium">{log.query}</div>
+                            <div className="text-xs text-slate-500">{log.user} • {log.time}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${log.status === 'Sent' ? 'text-purple-500 dark:text-purple-400' :
+                            log.status === 'Processed' ? 'text-blue-500 dark:text-blue-400' :
+                              'text-green-500 dark:text-green-400'
+                            }`}>{log.status}</span>
+                          {log.status === 'Answered' && <CheckIcon className="w-3 h-3 text-green-400" />}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </>
           )}
 
-        {activeTab === 'team' && (
-          <GroupLinks />
-        )}
+          {activeTab === 'team' && (
+            <GroupLinks />
+          )}
 
-        {activeTab === 'settings' && (
-          <Settings />
-        )}
+          {activeTab === 'settings' && (
+            <Settings />
+          )}
 
-        {/* Placeholder for other tabs (Inbox) */}
-        {activeTab === 'inbox' && (
-          <div className="flex flex-col items-center justify-center h-96 bg-slate-900/50 border border-slate-800 rounded-2xl border-dashed">
-            <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
-              <MessageCircleIcon className="w-8 h-8 text-slate-500" />
+          {/* Placeholder for other tabs (Inbox) */}
+          {activeTab === 'inbox' && (
+            <div className="flex flex-col items-center justify-center h-96 bg-slate-900/50 border border-slate-800 rounded-2xl border-dashed">
+              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                <MessageCircleIcon className="w-8 h-8 text-slate-500" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2 capitalize">{activeTab} View</h3>
+              <p className="text-slate-400 mb-6">This module is available in the full version.</p>
+              <Button variant="outline" onClick={() => setActiveTab('overview')}>
+                Return to Overview
+              </Button>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2 capitalize">{activeTab} View</h3>
-            <p className="text-slate-400 mb-6">This module is available in the full version.</p>
-            <Button variant="outline" onClick={() => setActiveTab('overview')}>
-              Return to Overview
-            </Button>
-          </div>
-        )}
+          )}
 
-    </div>
+        </div>
       </main >
     </div >
   );
