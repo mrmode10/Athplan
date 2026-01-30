@@ -32,65 +32,7 @@
 <body class="bg-slate-900 text-slate-200 selection:bg-indigo-500/30">
     <div id="root"></div>
 
-    <!-- Test Checkout Button -->
-    <div style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
-        <button id="checkout-button"
-            style="background-color: #635bff; color: white; padding: 10px 20px; border-radius: 4px; font-family: sans-serif; cursor: pointer; border: none; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-            Test Subscribe - $99
-        </button>
-    </div>
 
-    <script type="text/javascript">
-        // Initialize Stripe with the project key
-        const stripe = Stripe('pk_live_51Smuh3LHktvXWxv0olVsHpAEIxRL0VTbHP6k9HFd7MNmYI7ZqmORLjTan8jnzkH2021crdfmqcFm1voI1fsbbRQT003cWCfR2j');
-        const checkoutButton = document.getElementById('checkout-button');
-
-        checkoutButton.addEventListener('click', function () {
-            // Get Session from LocalStorage
-            const sessionStr = localStorage.getItem('sb-ppjzhesecvagtwfbvoek-auth-token');
-            if (!sessionStr) {
-                alert('You must be logged in to test subscription!');
-                window.location.href = '/login';
-                return;
-            }
-            const session = JSON.parse(sessionStr);
-            const token = session.access_token;
-
-            checkoutButton.innerText = "Processing...";
-            checkoutButton.disabled = true;
-
-            // Call Supabase Function
-            fetch('https://ppjzhesecvagtwfbvoek.supabase.co/functions/v1/manage-subscription', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Use Real User Token
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    action: 'create_checkout_session',
-                    plan: 'Starter'
-                })
-            })
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
-                    if (data.error) {
-                        alert('Error: ' + data.error);
-                    } else if (data.url) {
-                        // Redirect to the Stripe Checkout hosted page
-                        window.location.href = data.url;
-                    } else {
-                        alert('No URL returned');
-                    }
-                })
-                .catch(function (error) {
-                    console.error('Error:', error);
-                    alert('Fetch error: ' + error.message);
-                });
-        });
-    </script>
     <script type="module" src="/index.tsx"></script>
 </body>
 
