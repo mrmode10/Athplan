@@ -159,6 +159,7 @@ const Settings: React.FC = () => {
                 )}
             </div>
 
+
             <PaymentModal
                 isOpen={isPaymentModalOpen}
                 onClose={() => { setIsPaymentModalOpen(false); fetchSubscription(); }}
@@ -166,6 +167,63 @@ const Settings: React.FC = () => {
                 plan={subDetails?.plan || 'Starter'}
                 mode={paymentModalMode}
             />
+
+            {/* Varsity Access Section (Hostinger Integration) */}
+            <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-8">
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h4 className="text-lg font-bold text-slate-900 dark:text-white">Varsity Team Access</h4>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">Get exclusive access to Varsity features for your entire team.</p>
+                    </div>
+                    <button
+                        onClick={async () => {
+                            try {
+                                const { data: { user } } = await supabase.auth.getUser();
+                                const email = user?.email;
+
+                                const btn = document.getElementById('varsity-btn') as HTMLButtonElement;
+                                if (btn) {
+                                    btn.innerText = "Processing...";
+                                    btn.disabled = true;
+                                }
+
+                                const res = await fetch("https://api.athplan.com/create-checkout-session", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({ email })
+                                });
+
+                                const json = await res.json();
+                                if (!res.ok) throw new Error(json.error || 'Request failed');
+
+                                if (json.url) {
+                                    window.location.href = json.url;
+                                } else {
+                                    alert('No checkout URL returned.');
+                                    if (btn) {
+                                        btn.innerText = "Join Varsity - $20";
+                                        btn.disabled = false;
+                                    }
+                                }
+                            } catch (e: any) {
+                                console.error(e);
+                                alert(`Checkout failed: ${e.message}`);
+                                const btn = document.getElementById('varsity-btn') as HTMLButtonElement;
+                                if (btn) {
+                                    btn.innerText = "Join Varsity - $20";
+                                    btn.disabled = false;
+                                }
+                            }
+                        }}
+                        id="varsity-btn"
+                        className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg font-bold transition-all shadow-lg hover:shadow-green-500/20"
+                    >
+                        Join Varsity - $20
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
