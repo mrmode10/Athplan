@@ -114,7 +114,7 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
       </div>
 
       {/* Enterprise Card */}
-      <div className="rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-700 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-700 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
         <div>
           <div className="flex items-center gap-3 mb-3">
             <ShieldIcon className="w-6 h-6 text-indigo-400" />
@@ -133,6 +133,43 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
         >
           Contact Sales
         </Button>
+      </div>
+
+      {/* Special Offer / Checkout Button Section */}
+      <div className="text-center pt-8 border-t border-slate-800">
+        <p className="text-slate-400 mb-4">Looking for a quick start?</p>
+        <button
+          id="checkout-button"
+          className="bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all"
+          onClick={() => {
+            // Initialize Stripe
+            const stripe = (window as any).Stripe('pk_live_51Smuh3LHktvXWxv0olVsHpAEIxRL0VTbHP6k9HFd7MNmYI7ZqmORLjTan8jnzkH2021crdfmqcFm1voI1fsbbRQT003cWCfR2j');
+
+            // 1. Call your Backend to create the session
+            fetch('https://api.athplan.com/create-checkout-session', { // Your backend URL
+              method: 'POST',
+            })
+              .then(function (response) {
+                return response.json();
+              })
+              .then(function (session) {
+                // 2. Redirect the user to Stripe's secure page
+                return stripe.redirectToCheckout({ sessionId: session.id });
+              })
+              .then(function (result) {
+                // If there is an error (e.g. bad internet), show it
+                if (result.error) {
+                  alert(result.error.message);
+                }
+              })
+              .catch(err => {
+                console.error("Checkout error:", err);
+                alert("Error initiating checkout. See console.");
+              });
+          }}
+        >
+          Subscribe - $20
+        </button>
       </div>
     </section>
   );
