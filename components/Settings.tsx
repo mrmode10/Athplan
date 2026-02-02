@@ -180,6 +180,7 @@ const Settings: React.FC = () => {
                             try {
                                 const { data: { user } } = await supabase.auth.getUser();
                                 const email = user?.email;
+                                const phone = user?.phone || user?.user_metadata?.phone_number; // Try to get phone
 
                                 const btn = document.getElementById('varsity-btn') as HTMLButtonElement;
                                 if (btn) {
@@ -192,7 +193,7 @@ const Settings: React.FC = () => {
                                     headers: {
                                         "Content-Type": "application/json",
                                     },
-                                    body: JSON.stringify({ email })
+                                    body: JSON.stringify({ email, phone }) // Send phone
                                 });
 
                                 const json = await res.json();
