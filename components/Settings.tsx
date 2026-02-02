@@ -193,7 +193,10 @@ const Settings: React.FC = () => {
                                     headers: {
                                         "Content-Type": "application/json",
                                     },
-                                    body: JSON.stringify({ email, phone }) // Send phone
+                                    body: JSON.stringify({
+                                        email,
+                                        phoneNumber: phone // Map variable 'phone' to JSON field 'phoneNumber' to match backend expectation/snippet
+                                    })
                                 });
 
                                 const json = await res.json();
