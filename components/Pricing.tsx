@@ -8,48 +8,50 @@ interface PricingProps {
 }
 
 const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
-  {
-    name: 'Starter Pack',
+  const tiers = [
+    {
+      name: 'Starter Pack',
       price: '€99',
-        period: '/month',
-          description: 'Perfect for small coaching staffs and leadership groups.',
-            features: [
-              'Up to 8 Users',
-              'WhatsApp Native Interface',
-              'Instant Schedule Answers',
-              'Standard Email Support',
-              'Basic Itinerary Parsing'
-            ],
-              highlight: false,
+      period: '/month',
+      description: 'Perfect for small coaching staffs and leadership groups.',
+      features: [
+        'Up to 8 Users',
+        'WhatsApp Native Interface',
+        'Instant Schedule Answers',
+        'Standard Email Support',
+        'Basic Itinerary Parsing'
+      ],
+      highlight: false,
     },
-  {
-    name: 'All Star',
+    {
+      name: 'All Star',
       price: '€199',
-        period: '/month',
-          description: 'The standard for competitive high school and college teams.',
-            features: [
-              'Up to 20 Users',
-              'Everything in Starter',
-              'Priority Support',
-              'Travel Logistics Module',
-              'Multi-admin access'
-            ],
-              highlight: false,
+      period: '/month',
+      description: 'The standard for competitive high school and college teams.',
+      features: [
+        'Up to 20 Users',
+        'Everything in Starter',
+        'Priority Support',
+        'Travel Logistics Module',
+        'Multi-admin access'
+      ],
+      highlight: false,
     },
-  {
-    name: 'Hall of Fame',
+    {
+      name: 'Hall of Fame',
       price: '€249',
-        period: '/month',
-          description: 'Maximum power for large squads requiring constant uptime.',
-            features: [
-              'Up to 30 Users',
-              'Everything in All Star',
-              '24/7 AI Troubleshoot Support',
-              'Advanced Analytics Dashboard',
-              'Custom Hotel & Bus Integrations'
-            ],
-              highlight: true, // Highlight this tier
-    },
+      period: '/month',
+      description: 'Maximum power for large squads requiring constant uptime.',
+      features: [
+        'Up to 30 Users',
+        'Everything in All Star',
+        '24/7 AI Troubleshoot Support',
+        'Advanced Analytics Dashboard',
+        'Custom Hotel & Bus Integrations'
+      ],
+      highlight: true, // Highlight this tier
+    }
+  ];
 
   return (
     <section id="pricing" className="py-24 px-6 w-full max-w-7xl mx-auto relative">
@@ -131,43 +133,6 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
         >
           Contact Sales
         </Button>
-      </div>
-
-      {/* Special Offer / Checkout Button Section */}
-      <div className="text-center pt-8 border-t border-slate-800">
-        <p className="text-slate-400 mb-4">Looking for a quick start?</p>
-        <button
-          id="checkout-button"
-          className="bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all"
-          onClick={() => {
-            // Initialize Stripe
-            const stripe = (window as any).Stripe('pk_live_51Smuh3LHktvXWxv0olVsHpAEIxRL0VTbHP6k9HFd7MNmYI7ZqmORLjTan8jnzkH2021crdfmqcFm1voI1fsbbRQT003cWCfR2j');
-
-            // 1. Call your Backend to create the session
-            fetch('https://api.athplan.com/create-checkout-session', { // Your backend URL
-              method: 'POST',
-            })
-              .then(function (response) {
-                return response.json();
-              })
-              .then(function (session) {
-                // 2. Redirect the user to Stripe's secure page
-                return stripe.redirectToCheckout({ sessionId: session.id });
-              })
-              .then(function (result) {
-                // If there is an error (e.g. bad internet), show it
-                if (result.error) {
-                  alert(result.error.message);
-                }
-              })
-              .catch(err => {
-                console.error("Checkout error:", err);
-                alert("Error initiating checkout. See console.");
-              });
-          }}
-        >
-          Subscribe - €20
-        </button>
       </div>
     </section>
   );
