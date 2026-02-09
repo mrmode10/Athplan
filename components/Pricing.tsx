@@ -8,50 +8,48 @@ interface PricingProps {
 }
 
 const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
-  const tiers = [
-    {
-      name: 'Starter Pack',
-      price: '$99',
-      period: '/month',
-      description: 'Perfect for small coaching staffs and leadership groups.',
-      features: [
-        'Up to 8 Users',
-        'WhatsApp Native Interface',
-        'Instant Schedule Answers',
-        'Standard Email Support',
-        'Basic Itinerary Parsing'
-      ],
-      highlight: false,
+  {
+    name: 'Starter Pack',
+      price: '€99',
+        period: '/month',
+          description: 'Perfect for small coaching staffs and leadership groups.',
+            features: [
+              'Up to 8 Users',
+              'WhatsApp Native Interface',
+              'Instant Schedule Answers',
+              'Standard Email Support',
+              'Basic Itinerary Parsing'
+            ],
+              highlight: false,
     },
-    {
-      name: 'All Star',
-      price: '$199',
-      period: '/month',
-      description: 'The standard for competitive high school and college teams.',
-      features: [
-        'Up to 20 Users',
-        'Everything in Starter',
-        'Priority Support',
-        'Travel Logistics Module',
-        'Multi-admin access'
-      ],
-      highlight: false,
+  {
+    name: 'All Star',
+      price: '€199',
+        period: '/month',
+          description: 'The standard for competitive high school and college teams.',
+            features: [
+              'Up to 20 Users',
+              'Everything in Starter',
+              'Priority Support',
+              'Travel Logistics Module',
+              'Multi-admin access'
+            ],
+              highlight: false,
     },
-    {
-      name: 'Hall of Fame',
-      price: '$249',
-      period: '/month',
-      description: 'Maximum power for large squads requiring constant uptime.',
-      features: [
-        'Up to 30 Users',
-        'Everything in All Star',
-        '24/7 AI Troubleshoot Support',
-        'Advanced Analytics Dashboard',
-        'Custom Hotel & Bus Integrations'
-      ],
-      highlight: true, // Highlight this tier
+  {
+    name: 'Hall of Fame',
+      price: '€249',
+        period: '/month',
+          description: 'Maximum power for large squads requiring constant uptime.',
+            features: [
+              'Up to 30 Users',
+              'Everything in All Star',
+              '24/7 AI Troubleshoot Support',
+              'Advanced Analytics Dashboard',
+              'Custom Hotel & Bus Integrations'
+            ],
+              highlight: true, // Highlight this tier
     },
-  ];
 
   return (
     <section id="pricing" className="py-24 px-6 w-full max-w-7xl mx-auto relative">
@@ -168,7 +166,7 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
               });
           }}
         >
-          Subscribe - $20
+          Subscribe - €20
         </button>
       </div>
     </section>
