@@ -364,13 +364,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Crisis Mode Button */}
-            <button className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold rounded-full hover:bg-red-500/20 transition-colors" onClick={() => alert("Crisis Mode Activated: All players would receive an emergency push notification now.")}>
+            {/* Push Notification Button */}
+            <button className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold rounded-full hover:bg-indigo-500/20 transition-colors" onClick={() => alert("Push Notification: All players would receive a notification now.")}>
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
               </span>
-              CRISIS MODE
+              Push Notification
             </button>
 
             <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
