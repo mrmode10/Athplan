@@ -158,7 +158,7 @@ const Settings: React.FC = () => {
                                 return (
                                     <div key={planName} className={`p-4 rounded-xl border transition-colors duration-300 ${isCurrent ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50'}`}>
                                         <h4 className="text-lg font-bold text-slate-900 dark:text-white">{planName}</h4>
-                                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">${(PLAN_CONFIG[planName].amount / 100).toFixed(0)}/mo</p>
+                                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">€{(PLAN_CONFIG[planName].amount / 100).toFixed(0)}/mo</p>
 
                                         <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-2 mb-6">
                                             {(PLAN_CONFIG[planName] as any).features?.map((feature: string, i: number) => (
