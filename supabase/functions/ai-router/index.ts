@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { withCompliance } from '../_shared/compliance-middleware.ts'
+import { GoogleGenerativeAI } from 'npm:@google/generative-ai'
 
 console.log("AI Router Initialized")
 
@@ -9,14 +10,33 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL') as string
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
 
-// Mock Gemini Call (Replace with actual Google Generative AI SDK)
-async function callGemini(model: string, prompt: string) {
-    console.log(`Calling Gemini Model: ${model} with prompt prefix: ${prompt.substring(0, 50)}...`)
-    // Simulation of API response time
-    const delay = model.includes('pro') ? 1000 : 300;
-    await new Promise(resolve => setTimeout(resolve, delay));
+// Initialize Google Generative AI
+const apiKey = Deno.env.get('GEMINI_API_KEY');
+if (!apiKey) {
+    console.error("CRITICAL: GEMINI_API_KEY is missing from environment variables.");
+}
+const genAI = new GoogleGenerativeAI(apiKey || '');
 
-    return `[Response from ${model}]: Processed your request.`
+async function callGemini(modelName: string, prompt: string) {
+    if (!apiKey) {
+        return "System Error: AI Service Key is missing. Please contact support.";
+    }
+
+    try {
+        console.log(`Calling Gemini Model: ${modelName}...`);
+
+        // Use the requested model (e.g., gemini-1.5-flash)
+        const model = genAI.getGenerativeModel({ model: modelName });
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        return text;
+    } catch (error: any) {
+        console.error("Gemini API Error:", error);
+        return `I'm having trouble connecting to my brain right now. Please try again later. (Error: ${error.message})`;
+    }
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -81,16 +101,70 @@ const handler = async (req: Request): Promise<Response> => {
             );
         }
 
-        // 1. Fetch User's Team & Plan
-        // 3. Call AI
-        const responseText = await callGemini('gemini-pro', prompt)
+        // 3. User Context & Schedule Retrieval
+        // Fetch user's group to provide relevant schedule updates
+        const { data: userData, error: userError } = await supabase
+            .from('bot_users')
+            .select('group_name, phone_number')
+            .eq('phone_number', user_id) // Assuming user_id is phone number
+            .single();
+
+        let systemContext = "";
+
+        if (userData && userData.group_name) {
+            // Fetch latest schedule updates for this group
+            const { data: updates } = await supabase
+                .from('schedule_updates')
+                .select('content, created_at')
+                .eq('group_name', userData.group_name)
+                .order('created_at', { ascending: false })
+                .limit(3);
+
+            if (updates && updates.length > 0) {
+                const updateText = updates.map(u =>
+                    `- [${new Date(u.created_at).toLocaleString()}] ${u.content}`
+                ).join('\n');
+
+                systemContext = `
+IMPORTANT CONTEXT:
+User is in group: "${userData.group_name}".
+Here are the latest schedule updates for this group:
+${updateText}
+
+INSTRUCTIONS:
+- Use the above schedule info to answer questions about times, buses, or events.
+- If the answer is in the schedule updates, state it clearly.
+- If not found, say you don't have that specific info yet.
+`;
+            } else {
+                systemContext = `User is in group: "${userData.group_name}". No specific schedule updates found.`;
+            }
+        } else {
+            // Check 'users' table if not found in 'bot_users' (fallback)
+            const { data: appUser } = await supabase
+                .from('users')
+                .select('user_metadata')
+                .eq('id', user_id)
+                .single();
+
+            if (appUser?.user_metadata?.first_name) {
+                systemContext = `User name is ${appUser.user_metadata.first_name}.`;
+            }
+        }
+
+        const fullPrompt = `${systemContext}\n\nUser Query: ${prompt}`;
+        console.log("Sending prompt with context:", fullPrompt);
+
+        // 4. Call AI (Gemini 1.5 Flash)
+        const responseText = await callGemini('gemini-1.5-flash', fullPrompt)
 
         return new Response(
-            JSON.stringify({ result: responseText, model_used: 'gemini-pro' }),
+            JSON.stringify({ result: responseText, model_used: 'gemini-1.5-flash' }),
             { headers: { "Content-Type": "application/json" } },
         )
 
-    } catch (error) {
+    } catch (error: any) {
+        console.error("AI Router Error:", error);
         return new Response(
             JSON.stringify({ error: error.message }),
             { status: 500, headers: { "Content-Type": "application/json" } },
@@ -99,3 +173,4 @@ const handler = async (req: Request): Promise<Response> => {
 }
 
 serve(withCompliance(handler))
+
