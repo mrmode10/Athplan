@@ -8,6 +8,8 @@ export interface User {
   plan: 'starter' | 'all-star' | 'hall-of-fame' | 'pilot';
   paymentMethod?: 'apple' | 'google' | 'card';
   setup_mode?: 'undecided' | 'demo' | 'blank';
+  username?: string;
+  subscription_status?: string;
 }
 
 const DELAY = 800; // Simulate network latency

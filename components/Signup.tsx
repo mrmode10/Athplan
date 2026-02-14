@@ -31,6 +31,17 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
   const [isSuccess, setIsSuccess] = useState(false);
   const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
+  const getInputClassName = (fieldName: string) => {
+    const baseClasses = "w-full px-4 py-3 bg-slate-950 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors";
+    const errorClasses = "border-red-500 focus:border-red-500 focus:ring-red-500";
+    const normalClasses = "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500";
+
+    if (error && error.includes(fieldName)) {
+      return `${baseClasses} ${errorClasses}`;
+    }
+    return `${baseClasses} ${normalClasses}`;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -270,8 +281,7 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
                     autoComplete="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`w-full px-4 py-3 bg-slate-950 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors ${error && error.includes('email') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
-                      }`}
+                    className={getInputClassName('email')}
                     placeholder="coach@team.com"
                     required
                   />
@@ -285,8 +295,7 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
                     autoComplete="new-password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className={`w-full px-4 py-3 bg-slate-950 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors ${error && error.includes('Password') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
-                      }`}
+                    className={getInputClassName('Password')}
                     placeholder="Min 8 chars"
                     required
                   />

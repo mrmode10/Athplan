@@ -43,17 +43,9 @@ Hostinger might attempt to auto-detect settings, but verify them:
     -   *Note*: Vite outputs the production build to the `dist` folder by default.
 -   **Root Directory**: `/` (Leave empty or set to root).
 
-## Step 4: Environment Variables
-
-**CRITICAL STEP**: Your application requires API keys to function.
-
-1.  In the Hostinger deployment settings, find the **Environment Variables** section.
-2.  Add the following key-value pair:
-    -   **Key**: `GEMINI_API_KEY`
-    -   **Value**: *[Your actual Gemini API Key]*
-
-> [!WARNING]
-> Since this is a frontend-only deployment, the API Key will be embedded in the public code. Ensure your Gemini API Key has **restrictions** set in the Google Cloud Console to only allow requests from your specific domain (e.g., `https://your-site.com`).
+4.  **Environment Variables**:
+    -   Ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set if your app uses them.
+    -   **DO NOT** add `GEMINI_API_KEY` here. That secret belongs in your Backend (Supabase/Node.js).
 
 ## Step 5: Deploy
 

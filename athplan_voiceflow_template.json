@@ -1,0 +1,105 @@
+{
+    "project": {
+        "name": "Athplan Agent - Schedule Update Spec",
+        "nodes": [
+            {
+                "id": "start_node",
+                "type": "start",
+                "next": "intent_router"
+            },
+            {
+                "id": "intent_router",
+                "type": "intent",
+                "data": {
+                    "intents": [
+                        {
+                            "name": "update_schedule",
+                            "next": "ask_schedule_details"
+                        }
+                    ],
+                    "else": "fallback_response"
+                }
+            },
+            {
+                "id": "ask_schedule_details",
+                "type": "text",
+                "data": {
+                    "text": "What is the new schedule update? Please reply with the details."
+                },
+                "next": "capture_update"
+            },
+            {
+                "id": "capture_update",
+                "type": "capture",
+                "data": {
+                    "variable": "schedule_content"
+                },
+                "next": "confirm_update"
+            },
+            {
+                "id": "confirm_update",
+                "type": "text",
+                "data": {
+                    "text": "Got it. I will send this update to your group: \"{schedule_content}\". Is this correct?"
+                },
+                "next": "api_save"
+            },
+            {
+                "id": "api_save",
+                "type": "api",
+                "data": {
+                    "method": "POST",
+                    "url": "https://api.athplan.com/schedule-update",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "group": "{group_name}",
+                        "content": "{schedule_content}",
+                        "sender": "{user_id}"
+                    }
+                },
+                "next": "update_success",
+                "fail": "update_failure"
+            },
+            {
+                "id": "update_success",
+                "type": "text",
+                "data": {
+                    "text": "✅ Schedule updated and broadcast sent!"
+                }
+            },
+            {
+                "id": "update_failure",
+                "type": "text",
+                "data": {
+                    "text": "❌ Failed to save the update. Please try again."
+                }
+            },
+            {
+                "id": "fallback_response",
+                "type": "text",
+                "data": {
+                    "text": "I didn't capture that. You can say 'Update Schedule' to broadcast a message."
+                }
+            }
+        ],
+        "variables": [
+            "schedule_content",
+            "group_name",
+            "user_id"
+        ],
+        "intents": [
+            {
+                "name": "update_schedule",
+                "utterances": [
+                    "update schedule",
+                    "change schedule",
+                    "send broadcast",
+                    "new itinerary"
+                ]
+            }
+        ]
+    },
+    "version": "1.0.0"
+}

@@ -24,22 +24,25 @@ const GroupLinks: React.FC = () => {
 
     const fetchGroups = async () => {
         try {
+            // Fetch the user's team (since RLS restricts to only their team)
             const { data, error } = await supabase
-                .from('groups')
-                .select('*');
+                .from('teams')
+                .select('id, name, join_code');
 
             if (error) throw error;
-            setGroups(data || []);
+            // Map teams to groups structure (just for UI compatibility)
+            setGroups(data as any || []);
         } catch (err: any) {
-            console.error('Error loading groups:', err);
-            setError('Failed to load groups');
+            console.error('Error loading team links:', err);
+            setError('Failed to load team links');
         } finally {
             setLoading(false);
         }
     };
 
     const generateLink = (groupName: string, secretCode: string) => {
-        const message = `Join-${groupName}-${secretCode}`;
+        // Use a simple format: "Join <Code>" for robust parsing
+        const message = `Join ${secretCode}`;
         const encodedMessage = encodeURIComponent(message);
         return `https://wa.me/${MY_NUMBER}?text=${encodedMessage}`;
     };
@@ -94,8 +97,8 @@ const GroupLinks: React.FC = () => {
                             <button
                                 onClick={() => copyToClipboard(link, group.id)}
                                 className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-all ${copiedId === group.id
-                                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                        : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
                                     }`}
                             >
                                 {copiedId === group.id ? 'Copied Link!' : 'Copy WhatsApp Link'}

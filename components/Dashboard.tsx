@@ -300,6 +300,24 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
         </div>
       )}
 
+      {/* Subscription Suspension Modal */}
+      {user.subscription_status && !['active', 'trialing'].includes(user.subscription_status) && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md">
+          <div className="max-w-md w-full bg-slate-900 border border-red-500/30 rounded-2xl p-8 shadow-2xl animate-fade-in-up text-center">
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center text-red-500 mx-auto mb-6">
+              <ZapIcon className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Access Suspended</h2>
+            <p className="text-slate-400 mb-6">
+              Your trial has expired or payment information is missing. Please update your billing details to restore full access.
+            </p>
+            <Button onClick={() => setActiveTab('settings')} className="w-full">
+              Update Payment Method
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 transition-colors duration-300">
         <div className="p-6 flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" onClick={onHome}>
@@ -343,7 +361,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
               {user.firstName.charAt(0)}{user.lastName.charAt(0)}
             </div>
             <div className="flex-1 overflow-hidden">
-              <div className="text-sm font-medium text-slate-900 dark:text-white truncate">{user.firstName} {user.lastName}</div>
+              <div className="text-sm font-medium text-slate-900 dark:text-white truncate">@{user.username || user.firstName}</div>
               <div className="text-xs text-slate-500 truncate">{user.team}</div>
             </div>
           </div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import { supabase } from '../lib/supabase';
 import PaymentModal from './PaymentModal';
+import CancellationSurvey from './CancellationSurvey';
 import { PLAN_CONFIG } from '../supabase/functions/_shared/plans';
 
 type Plan = 'Starter' | 'All Star' | 'Hall of Fame';
@@ -25,6 +26,7 @@ const Settings: React.FC = () => {
     const [subDetails, setSubDetails] = useState<SubscriptionDetails | null>(null);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [paymentModalMode, setPaymentModalMode] = useState<'payment' | 'setup'>('payment');
+    const [showCancelSurvey, setShowCancelSurvey] = useState(false);
 
     // Load subscription on mount
     useEffect(() => {
@@ -187,6 +189,28 @@ const Settings: React.FC = () => {
                     </>
                 )}
             </div>
+
+            {/* Cancel Survey Modal */}
+            <CancellationSurvey
+                isOpen={showCancelSurvey}
+                onClose={() => setShowCancelSurvey(false)}
+                onSuccess={() => {
+                    setShowCancelSurvey(false);
+                    fetchSubscription(); // Refresh status
+                    alert("Subscription cancelled successfully.");
+                }}
+            />
+
+            {subDetails?.status === 'active' && (
+                <div className="mt-8 pt-6 border-t border-slate-800 flex justify-center">
+                    <button
+                        onClick={() => setShowCancelSurvey(true)}
+                        className="text-sm text-slate-500 hover:text-red-400 transition-colors"
+                    >
+                        Cancel Subscription
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

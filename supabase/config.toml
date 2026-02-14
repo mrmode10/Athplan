@@ -8,12 +8,12 @@ extra_search_path = ["public", "extensions"]
 
 [db]
 port = 54322
-major_version = 15
+major_version = 17
 
 [studio]
 enabled = true
 port = 54323
-api_port = 54324
+
 
 [functions]
 [functions.check-subscription]

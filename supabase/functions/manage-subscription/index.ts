@@ -137,6 +137,10 @@ serve(async (req) => {
 
             const subId = subscriptions.data[0].id;
 
+            const updatedSub = await stripe.subscriptions.update(subId, {
+                cancel_at_period_end: true
+            });
+
             return new Response(JSON.stringify({ subscription: updatedSub, message: 'Subscription set to cancel at period end.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
 
