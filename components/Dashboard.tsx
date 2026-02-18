@@ -555,7 +555,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
           )}
 
           {activeTab === 'settings' && (
-            <Settings />
+            <Settings teamName={user.team} />
           )}
 
           {/* Placeholder for other tabs (Inbox) */}

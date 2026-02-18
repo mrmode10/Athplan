@@ -20,7 +20,11 @@ interface SubscriptionDetails {
     } | null;
 }
 
-const Settings: React.FC = () => {
+interface SettingsProps {
+    teamName: string;
+}
+
+const Settings: React.FC<SettingsProps> = ({ teamName }) => {
     // Subscription state
     const [loading, setLoading] = useState(true);
     const [subDetails, setSubDetails] = useState<SubscriptionDetails | null>(null);
@@ -211,6 +215,50 @@ const Settings: React.FC = () => {
                     </button>
                 </div>
             )}
+            {/* Team Management Section */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors duration-300">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Team Management</h3>
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Manage Admins</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                        Add other team members as admins. They will be able to manage the team and settings.
+                    </p>
+
+                    <div className="flex gap-3">
+                        <input
+                            type="tel"
+                            placeholder="+1234567890"
+                            className="flex-1 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            id="newAdminPhone"
+                        />
+                        <Button
+                            onClick={async () => {
+                                const input = document.getElementById('newAdminPhone') as HTMLInputElement;
+                                const phone = input.value.trim();
+                                if (!phone) return alert("Please enter a phone number");
+                                if (!teamName) return alert("Team name is missing. Please contact support.");
+
+                                try {
+                                    const { error } = await supabase.rpc('add_team_admin', {
+                                        p_phone_number: phone,
+                                        p_group_name: teamName
+                                    });
+
+                                    if (error) throw error;
+                                    alert(`Successfully added ${phone} as an admin!`);
+                                    input.value = '';
+                                } catch (e: any) {
+                                    console.error(e);
+                                    alert("Failed to add admin: " + e.message);
+                                }
+                            }}
+                            className="whitespace-nowrap"
+                        >
+                            Add Admin
+                        </Button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
