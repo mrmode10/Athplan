@@ -16,7 +16,7 @@ interface SignupProps {
 
 
 const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPlan }) => {
-  const [step, setStep] = useState<'details' | 'verification' | 'payment'>('details');
+  const [step, setStep] = useState<'details' | 'verification' | 'payment' | 'join_link'>('details');
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -30,6 +30,9 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [generatedJoinLink, setGeneratedJoinLink] = useState('');
+  const [hasCopiedLink, setHasCopiedLink] = useState(false);
+  const MY_NUMBER = "18139454758"; // Configured business number
 
   const getInputClassName = (fieldName: string) => {
     const baseClasses = "w-full px-4 py-3 bg-slate-950 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors";
@@ -195,6 +198,12 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
             <>
               <h2 className="text-3xl font-bold text-white mb-2">Select Payment Method</h2>
               <p className="text-slate-400">You won't be charged today.</p>
+            </>
+          )}
+          {step === 'join_link' && (
+            <>
+              <h2 className="text-3xl font-bold text-white mb-2">Invite Your Team</h2>
+              <p className="text-slate-400">Share this link so players can talk to the AI.</p>
             </>
           )}
         </div>
@@ -402,17 +411,74 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
                       // though it's critical for the bot. For now, we log and proceed.
                     }
 
+                    // Generate the WhatsApp Link
+                    const message = `Join ${joinCode}`;
+                    const encodedMessage = encodeURIComponent(message);
+                    setGeneratedJoinLink(`https://wa.me/${MY_NUMBER}?text=${encodedMessage}`);
+
                     // 3. Update User
                     await supabase.from('users').update({
                       plan: selectedPlan,
                       subscription_status: 'trialing'
                     }).eq('id', user.id);
 
-                    onSuccess(user as any);
+                    // Move to the mandatory link sharing step instead of directly succeeding
+                    setStep('join_link');
                   }
                 }}
               />
               <p className="text-xs text-slate-500">Secure payment via Stripe</p>
+            </div>
+          )}
+
+          {step === 'join_link' && (
+            <div className="flex flex-col items-center justify-center p-2 space-y-6 animate-fade-in text-center">
+              <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-500 mb-2">
+                <CheckIcon className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Your team is ready!</h3>
+              <p className="text-slate-300">
+                To sort your players to the correct group for the right AI answers, <strong>you must share this direct link with them via WhatsApp or email.</strong>
+              </p>
+
+              <div className="w-full bg-slate-950 border border-slate-800 p-4 rounded-xl flex flex-col gap-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={generatedJoinLink}
+                    readOnly
+                    className="w-full bg-slate-900 border border-slate-800 rounded px-3 py-3 text-sm text-slate-300 focus:outline-none text-center"
+                    onClick={(e) => e.currentTarget.select()}
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(generatedJoinLink);
+                    setHasCopiedLink(true);
+                  }}
+                  className={`w-full py-3 rounded-lg text-sm font-bold transition-all ${hasCopiedLink
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                    }`}
+                >
+                  {hasCopiedLink ? 'Copied to Clipboard!' : 'Copy Join Link'}
+                </button>
+              </div>
+
+              <div className="w-full pt-4">
+                <Button
+                  className="w-full"
+                  disabled={!hasCopiedLink}
+                  onClick={async () => {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                      onSuccess(user as any);
+                    }
+                  }}
+                >
+                  {hasCopiedLink ? 'I have shared the link (Continue)' : 'Copy the link to continue'}
+                </Button>
+              </div>
             </div>
           )}
 

@@ -6,6 +6,7 @@
 CREATE OR REPLACE FUNCTION public.ensure_join_code()
 RETURNS TRIGGER 
 LANGUAGE plpgsql
+SET search_path = ''
 AS $$
 BEGIN
   IF NEW.join_code IS NULL OR NEW.join_code = '' THEN
@@ -39,6 +40,7 @@ CREATE OR REPLACE FUNCTION public.add_team_admin(
 RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
   v_current_user_id uuid;

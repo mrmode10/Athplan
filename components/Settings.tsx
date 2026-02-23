@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase';
 import PaymentModal from './PaymentModal';
 import CancellationSurvey from './CancellationSurvey';
 import { PLAN_CONFIG } from '../supabase/functions/_shared/plans';
+import { ShareIcon, CheckIcon } from './icons/Icons';
+import KnowledgeUploader from './KnowledgeUploader';
 
 type Plan = 'Starter' | 'All Star' | 'Hall of Fame';
 
@@ -32,10 +34,39 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
     const [paymentModalMode, setPaymentModalMode] = useState<'payment' | 'setup'>('payment');
     const [showCancelSurvey, setShowCancelSurvey] = useState(false);
 
+    // Group Link state
+    const [joinLink, setJoinLink] = useState<string | null>(null);
+    const [hasCopiedLink, setHasCopiedLink] = useState(false);
+    const MY_NUMBER = "18139454758"; // Configured business number
+
     // Load subscription on mount
     useEffect(() => {
         fetchSubscription();
+        fetchJoinLink();
     }, []);
+
+    const fetchJoinLink = async () => {
+        if (!teamName) return;
+        try {
+            const { data, error } = await supabase
+                .from('groups')
+                .select('join_code')
+                .eq('name', teamName)
+                .single();
+
+            if (error) {
+                console.error("Error fetching join code:", error);
+                return;
+            }
+            if (data?.join_code) {
+                const message = `Join ${data.join_code}`;
+                const encodedMessage = encodeURIComponent(message);
+                setJoinLink(`https://wa.me/${MY_NUMBER}?text=${encodedMessage}`);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
 
     const fetchSubscription = async () => {
         setLoading(true);
@@ -218,46 +249,84 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
             {/* Team Management Section */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors duration-300">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Team Management</h3>
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Manage Admins</h4>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                        Add other team members as admins. They will be able to manage the team and settings.
-                    </p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Add Admin */}
+                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                        <h4 className="font-bold text-slate-900 dark:text-white mb-2">Manage Admins</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 h-10">
+                            Add other team members as admins. They will be able to manage the team and settings.
+                        </p>
 
-                    <div className="flex gap-3">
-                        <input
-                            type="tel"
-                            placeholder="+1234567890"
-                            className="flex-1 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            id="newAdminPhone"
-                        />
-                        <Button
-                            onClick={async () => {
-                                const input = document.getElementById('newAdminPhone') as HTMLInputElement;
-                                const phone = input.value.trim();
-                                if (!phone) return alert("Please enter a phone number");
-                                if (!teamName) return alert("Team name is missing. Please contact support.");
+                        <div className="flex gap-3">
+                            <input
+                                type="tel"
+                                placeholder="+1234567890"
+                                className="flex-1 min-w-0 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                id="newAdminPhone"
+                            />
+                            <Button
+                                onClick={async () => {
+                                    const input = document.getElementById('newAdminPhone') as HTMLInputElement;
+                                    const phone = input.value.trim();
+                                    if (!phone) return alert("Please enter a phone number");
+                                    if (!teamName) return alert("Team name is missing. Please contact support.");
 
-                                try {
-                                    const { error } = await supabase.rpc('add_team_admin', {
-                                        p_phone_number: phone,
-                                        p_group_name: teamName
-                                    });
+                                    try {
+                                        const { error } = await supabase.rpc('add_team_admin', {
+                                            p_phone_number: phone,
+                                            p_group_name: teamName
+                                        });
 
-                                    if (error) throw error;
-                                    alert(`Successfully added ${phone} as an admin!`);
-                                    input.value = '';
-                                } catch (e: any) {
-                                    console.error(e);
-                                    alert("Failed to add admin: " + e.message);
-                                }
-                            }}
-                            className="whitespace-nowrap"
-                        >
-                            Add Admin
-                        </Button>
+                                        if (error) throw error;
+                                        alert(`Successfully added ${phone} as an admin!`);
+                                        input.value = '';
+                                    } catch (e: any) {
+                                        console.error(e);
+                                        alert("Failed to add admin: " + e.message);
+                                    }
+                                }}
+                                className="whitespace-nowrap flex-shrink-0 px-4"
+                            >
+                                Add Admin
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Group Join Link */}
+                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                        <h4 className="font-bold text-slate-900 dark:text-white mb-2">WhatsApp Join Link</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 h-10">
+                            Share this link with your players so they can chat with the Athplan AI.
+                        </p>
+
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                readOnly
+                                value={joinLink || 'Loading link...'}
+                                className="flex-1 min-w-0 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-500 dark:text-slate-400 focus:outline-none text-sm select-all"
+                                onClick={(e) => e.currentTarget.select()}
+                            />
+                            <Button
+                                disabled={!joinLink}
+                                onClick={() => {
+                                    if (joinLink) {
+                                        navigator.clipboard.writeText(joinLink);
+                                        setHasCopiedLink(true);
+                                        setTimeout(() => setHasCopiedLink(false), 3000);
+                                    }
+                                }}
+                                variant="secondary"
+                                className={`whitespace-nowrap flex-shrink-0 transition-colors ${hasCopiedLink ? 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30' : ''}`}
+                            >
+                                {hasCopiedLink ? 'Copied!' : 'Copy'}
+                            </Button>
+                        </div>
                     </div>
                 </div>
+
+                {/* Knowledge Base Uploader */}
+                <KnowledgeUploader teamName={teamName} />
             </div>
         </div>
     );
