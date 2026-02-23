@@ -5,6 +5,7 @@ import { AthplanLogo, BotIcon, MessageCircleIcon, SmartphoneIcon, ZapIcon, Check
 import { User } from '../lib/mockBackend';
 import GroupLinks from './GroupLinks';
 import Settings from './Settings';
+import KnowledgeUploader from './KnowledgeUploader';
 import { supabase } from '../lib/supabase';
 
 interface DashboardProps {
@@ -54,12 +55,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
   const [stats, setStats] = useState({ queries: 0, activePlayers: 0, timeSaved: 0 });
 
-  // File Upload State
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadFileName, setUploadFileName] = useState('');
-  const [isDragActive, setIsDragActive] = useState(false);
+  // File Upload State removed because KnowledgeUploader handles it now
 
   // Persistence Check
   useEffect(() => {
@@ -129,74 +125,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
 
   // --- Handlers ---
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setUploadFileName(file.name);
-      simulateUpload(file.name);
-    }
-  };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragActive(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragActive(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      setUploadFileName(file.name);
-      simulateUpload(file.name);
-    }
-  };
-
-  const simulateUpload = (fileName: string) => {
-    setIsUploading(true);
-    setUploadProgress(0);
-
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          finishUpload(fileName);
-          return 100;
-        }
-        return prev + 15;
-      });
-    }, 200);
-  };
-
-  const finishUpload = (fileName: string) => {
-    setTimeout(() => {
-      setIsUploading(false);
-      setUploadProgress(0);
-      setUploadFileName('');
-
-      // Update stats for effect
-      setStats(prev => ({ ...prev, queries: prev.queries + 1, timeSaved: prev.timeSaved + 0.1 }));
-
-      // Add to log
-      const newLog: ActivityLog = {
-        id: Date.now(),
-        time: 'Just now',
-        user: 'System',
-        query: `Knowledge Base Updated: "${fileName}"`,
-        status: 'Processed'
-      };
-      setActivityLog(prev => [newLog, ...prev]);
-    }, 500);
-  };
 
   const handleBroadcastSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -434,53 +363,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 {/* Upload Action */}
-                <div className="bg-gradient-to-br from-indigo-500/10 to-slate-50 dark:from-indigo-900/50 dark:to-slate-900 border border-indigo-200 dark:border-indigo-500/30 p-6 rounded-2xl relative overflow-hidden flex flex-col transition-colors duration-300">
-                  {setupMode === 'demo' && (
-                    <InfoTip title="Feed the Brain">
-                      Upload your PDF/Excel itinerary here. The AI reads it to answer player questions automatically.
-                    </InfoTip>
-                  )}
-
-                  <div className="relative z-10 flex-1">
-                    <h3 className="font-bold text-slate-900 dark:text-white mb-2">Upload Schedule</h3>
-                    <p className="text-sm text-slate-400 mb-6">
-                      Drag and drop your PDF itinerary here to update the bot's knowledge base.
-                    </p>
-
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileSelect}
-                      className="hidden"
-                      accept=".pdf,.csv,.xlsx"
-                    />
-
-                    {isUploading ? (
-                      <div className="w-full bg-slate-800 rounded-full h-2.5 mb-2 mt-auto">
-                        <div className="bg-indigo-500 h-2.5 rounded-full transition-all duration-200" style={{ width: `${uploadProgress}%` }}></div>
-                        <p className="text-xs text-indigo-300 mt-2 text-center">Uploading {uploadFileName} ({uploadProgress}%)...</p>
-                      </div>
-                    ) : (
-                      <div
-                        onClick={() => fileInputRef.current?.click()}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        className={`border-2 border-dashed rounded-xl h-32 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragActive
-                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
-                          : 'border-slate-300 dark:border-slate-700 hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-indigo-500/5'
-                          }`}
-                      >
-                        <div className={`p-3 rounded-full mb-2 transition-transform ${isDragActive ? 'bg-indigo-500/20 scale-110' : 'bg-slate-100 dark:bg-slate-800 group-hover:scale-110'}`}>
-                          <ZapIcon className={`w-5 h-5 ${isDragActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-indigo-600 dark:text-indigo-400'}`} />
-                        </div>
-                        <span className={`text-xs font-medium ${isDragActive ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300'}`}>
-                          {isDragActive ? 'Drop File Here' : 'Drag & Drop or Click to Upload'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <KnowledgeUploader teamName={user.team} />
 
                 {/* Broadcast Action */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col transition-colors duration-300">

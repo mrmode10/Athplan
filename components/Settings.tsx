@@ -6,7 +6,7 @@ import PaymentModal from './PaymentModal';
 import CancellationSurvey from './CancellationSurvey';
 import { PLAN_CONFIG } from '../supabase/functions/_shared/plans';
 import { ShareIcon, CheckIcon } from './icons/Icons';
-import KnowledgeUploader from './KnowledgeUploader';
+import { ShareIcon, CheckIcon } from './icons/Icons';
 
 type Plan = 'Starter' | 'All Star' | 'Hall of Fame';
 
@@ -325,8 +325,43 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
                     </div>
                 </div>
 
-                {/* Knowledge Base Uploader */}
-                <KnowledgeUploader teamName={teamName} />
+                {/* Update Team Name */}
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700 mt-6">
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Team Name</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 h-10">
+                        Update your team's display name.
+                    </p>
+
+                    <div className="flex gap-3">
+                        <input
+                            type="text"
+                            defaultValue={teamName}
+                            className="flex-1 min-w-0 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            id="updateTeamNameInput"
+                        />
+                        <Button
+                            onClick={async () => {
+                                const input = document.getElementById('updateTeamNameInput') as HTMLInputElement;
+                                const newName = input.value.trim();
+                                if (!newName) return alert("Please enter a team name");
+                                if (newName === teamName) return alert("Please enter a new team name");
+
+                                try {
+                                    // This updates the team name. Ensure RLS allows this.
+                                    const { error } = await supabase.from('teams').update({ name: newName }).eq('name', teamName);
+                                    if (error) throw error;
+                                    alert(`Successfully updated team name to ${newName}! Please refresh the page.`);
+                                } catch (e: any) {
+                                    console.error(e);
+                                    alert("Failed to update team name. " + e.message);
+                                }
+                            }}
+                            className="whitespace-nowrap flex-shrink-0 px-4"
+                        >
+                            Update
+                        </Button>
+                    </div>
+                </div>
             </div>
         </div>
     );
