@@ -55,6 +55,39 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
   const [stats, setStats] = useState({ queries: 0, activePlayers: 0, timeSaved: 0 });
 
+  // Admin & Files State
+  const [adminNumbers, setAdminNumbers] = useState<string[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; created_at: string }[]>([]);
+
+  useEffect(() => {
+    const fetchAdminAndFiles = async () => {
+      if (!user?.team) return;
+      try {
+        // Fetch admin phone numbers for this team
+        const { data: admins } = await supabase
+          .from('bot_users')
+          .select('phone_number')
+          .eq('group_name', user.team)
+          .eq('is_admin', true);
+        if (admins) setAdminNumbers(admins.map(a => a.phone_number));
+      } catch (e) { console.error(e); }
+
+      try {
+        // Fetch uploaded files from Supabase Storage
+        const { data: files } = await supabase.storage
+          .from('group_knowledge')
+          .list(user.team, { limit: 20, sortBy: { column: 'created_at', order: 'desc' } });
+        if (files) {
+          setUploadedFiles(files.map(f => ({
+            name: f.name,
+            created_at: f.created_at || ''
+          })));
+        }
+      } catch (e) { console.error(e); }
+    };
+    fetchAdminAndFiles();
+  }, [user?.team]);
+
   // WhatsApp Link State
   const [joinLink, setJoinLink] = useState<string | null>(null);
   const MY_NUMBER = "18139454758"; // Configured business number
@@ -387,6 +420,53 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
                   <div className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-2">Time Saved</div>
                   <div className="text-3xl font-bold text-slate-900 dark:text-white">{stats.timeSaved.toFixed(1)} hrs</div>
                   {setupMode === 'demo' && <div className="mt-2 text-xs text-indigo-500 dark:text-indigo-400">This week so far</div>}
+                </div>
+              </div>
+
+              {/* Team Info Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Admin Numbers */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl transition-colors duration-300">
+                  <h3 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                    <SmartphoneIcon className="w-5 h-5 text-indigo-400" /> Team Admins
+                  </h3>
+                  {adminNumbers.length === 0 ? (
+                    <p className="text-sm text-slate-500">No admins registered yet. Add one in Settings.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {adminNumbers.map((num, i) => (
+                        <div key={i} className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <div className="w-8 h-8 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs font-bold">A{i + 1}</div>
+                          <span className="text-sm text-slate-900 dark:text-white font-mono">{num}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Uploaded Files */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl transition-colors duration-300">
+                  <h3 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                    <ZapIcon className="w-5 h-5 text-indigo-400" /> Knowledge Base Files
+                  </h3>
+                  {uploadedFiles.length === 0 ? (
+                    <p className="text-sm text-slate-500">No files uploaded yet. Upload your playbook or schedule above.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {uploadedFiles.map((file, i) => {
+                        const displayName = file.name.replace(/^\d+_/, '');
+                        return (
+                          <div key={i} className="flex items-center justify-between gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-indigo-400 text-lg">📄</span>
+                              <span className="text-sm text-slate-900 dark:text-white truncate" title={displayName}>{displayName}</span>
+                            </div>
+                            {file.created_at && <span className="text-[10px] text-slate-500 whitespace-nowrap">{new Date(file.created_at).toLocaleDateString()}</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
