@@ -55,6 +55,26 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
   const [stats, setStats] = useState({ queries: 0, activePlayers: 0, timeSaved: 0 });
 
+  // WhatsApp Link State
+  const [joinLink, setJoinLink] = useState<string | null>(null);
+  const MY_NUMBER = "18139454758"; // Configured business number
+
+  useEffect(() => {
+    const fetchJoinLink = async () => {
+      if (!user?.team) return;
+      try {
+        const { data, error } = await supabase.from('groups').select('join_code').eq('name', user.team).single();
+        if (data?.join_code) {
+          const encodedMessage = encodeURIComponent(`Join ${data.join_code}`);
+          setJoinLink(`https://wa.me/${MY_NUMBER}?text=${encodedMessage}`);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchJoinLink();
+  }, [user?.team]);
+
   // File Upload State removed because KnowledgeUploader handles it now
 
   // Persistence Check
@@ -307,6 +327,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white capitalize">{activeTab}</h1>
             <div className="flex items-center gap-2 mt-1">
               <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-xs border border-indigo-500/30">14 Days Left in Trial</span>
+              {activeTab === 'overview' && joinLink && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(joinLink);
+                    alert("WhatsApp Join Link Copied!");
+                  }}
+                  className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs font-bold border border-green-500/30 hover:bg-green-500/30 transition-colors flex items-center gap-1 shadow-sm"
+                >
+                  Copy WhatsApp Link
+                </button>
+              )}
             </div>
           </div>
 

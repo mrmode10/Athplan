@@ -350,12 +350,26 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
                                 if (newName === teamName) return alert("Please enter a new team name");
 
                                 try {
-                                    // Call the RPC to update team name across all tables
-                                    const { error: rpcError } = await supabase.rpc('update_team_name', {
-                                        p_old_name: teamName,
-                                        p_new_name: newName
-                                    });
-                                    if (rpcError) throw rpcError;
+                                    if (!teamName || teamName.trim() === '') {
+                                        // They have no team name yet; create their group
+                                        const teamSlug = newName.replace(/\s+/g, '').slice(0, 10);
+                                        const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+                                        const joinCode = `${teamSlug}-${randomSuffix}`;
+                                        const { error: insertError } = await supabase.from('groups').insert({
+                                            name: newName,
+                                            join_code: joinCode
+                                        });
+                                        if (insertError) {
+                                            console.warn("Could not insert group:", insertError);
+                                        }
+                                    } else {
+                                        // Call the RPC to update team name across all tables
+                                        const { error: rpcError } = await supabase.rpc('update_team_name', {
+                                            p_old_name: teamName,
+                                            p_new_name: newName
+                                        });
+                                        if (rpcError) throw rpcError;
+                                    }
 
                                     // Update user metadata so the UI globally refreshes
                                     const { error: authError } = await supabase.auth.updateUser({
