@@ -6,7 +6,6 @@ import PaymentModal from './PaymentModal';
 import CancellationSurvey from './CancellationSurvey';
 import { PLAN_CONFIG } from '../supabase/functions/_shared/plans';
 import { ShareIcon, CheckIcon } from './icons/Icons';
-import { ShareIcon, CheckIcon } from './icons/Icons';
 
 type Plan = 'Starter' | 'All Star' | 'Hall of Fame';
 
@@ -272,16 +271,23 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
                                     const input = document.getElementById('newAdminPhone') as HTMLInputElement;
                                     const phone = input.value.trim();
                                     if (!phone) return alert("Please enter a phone number");
-                                    if (!teamName) return alert("Team name is missing. Please contact support.");
+
+                                    // Get team name from prop or from session metadata
+                                    let currentTeam = teamName;
+                                    if (!currentTeam) {
+                                        const { data: { user } } = await supabase.auth.getUser();
+                                        currentTeam = user?.user_metadata?.team || '';
+                                    }
+                                    if (!currentTeam) return alert("Please set your team name first in the 'Team Name' section below.");
 
                                     try {
                                         const { error } = await supabase.rpc('add_team_admin', {
                                             p_phone_number: phone,
-                                            p_group_name: teamName
+                                            p_group_name: currentTeam
                                         });
 
                                         if (error) throw error;
-                                        alert(`Successfully added ${phone} as an admin!`);
+                                        alert(`Successfully added ${phone} as an admin for ${currentTeam}!`);
                                         input.value = '';
                                     } catch (e: any) {
                                         console.error(e);
