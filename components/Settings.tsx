@@ -42,8 +42,11 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
     // Load subscription on mount
     useEffect(() => {
         fetchSubscription();
-        fetchJoinLink();
     }, []);
+
+    useEffect(() => {
+        fetchJoinLink();
+    }, [teamName]);
 
     const fetchJoinLink = async () => {
         if (!teamName) return;
@@ -347,10 +350,20 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
                                 if (newName === teamName) return alert("Please enter a new team name");
 
                                 try {
-                                    // This updates the team name. Ensure RLS allows this.
-                                    const { error } = await supabase.from('teams').update({ name: newName }).eq('name', teamName);
-                                    if (error) throw error;
-                                    alert(`Successfully updated team name to ${newName}! Please refresh the page.`);
+                                    // Call the RPC to update team name across all tables
+                                    const { error: rpcError } = await supabase.rpc('update_team_name', {
+                                        p_old_name: teamName,
+                                        p_new_name: newName
+                                    });
+                                    if (rpcError) throw rpcError;
+
+                                    // Update user metadata so the UI globally refreshes
+                                    const { error: authError } = await supabase.auth.updateUser({
+                                        data: { team: newName }
+                                    });
+                                    if (authError) throw authError;
+
+                                    alert(`Successfully updated team name to ${newName}!`);
                                 } catch (e: any) {
                                     console.error(e);
                                     alert("Failed to update team name. " + e.message);
