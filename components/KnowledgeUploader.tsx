@@ -95,7 +95,7 @@ const KnowledgeUploader: React.FC<KnowledgeUploaderProps> = ({ teamName }) => {
                     className="hidden"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.txt,.csv,.md"
+                    accept=".pdf,.doc,.docx,.txt,.csv,.md,.xlsx,.xls,.pages,.numbers,.key,.rtf,.json"
                 />
 
                 {file ? (
@@ -122,15 +122,15 @@ const KnowledgeUploader: React.FC<KnowledgeUploaderProps> = ({ teamName }) => {
                             </svg>
                         </div>
                         <p className="font-medium text-slate-900 dark:text-white">Click to upload or drag and drop</p>
-                        <p className="text-xs text-slate-500 mt-1">PDF, DOCX, TXT, CSV up to 10MB</p>
+                        <p className="text-xs text-slate-500 mt-1">PDF, Word, Excel, Pages, Numbers, CSV, TXT, RTF up to 10MB</p>
                     </div>
                 )}
             </div>
 
             {message && (
                 <div className={`p-3 rounded-lg mb-4 text-sm font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800' :
-                        message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800' :
-                            'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800'
+                    message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800' :
+                        'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800'
                     }`}>
                     <div className="flex items-center gap-2">
                         {uploading && (
