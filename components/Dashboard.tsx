@@ -545,7 +545,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
           )}
 
           {activeTab === 'team' && (
-            <GroupLinks />
+            <GroupLinks teamName={user.team} />
           )}
 
           {activeTab === 'settings' && (
