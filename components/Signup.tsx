@@ -83,7 +83,7 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
 
     try {
       // Check if team name exists
-      const { data: nameExists, error: nameCheckError } = await supabase.rpc('check_group_name_exists', {
+      const { data: nameExists, error: nameCheckError } = await supabase.rpc('check_team_name_exists', {
         p_name: formData.team
       });
 
@@ -399,16 +399,15 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
                     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
                     const joinCode = `${teamSlug}-${randomSuffix}`;
 
-                    // 2. Create Group
-                    const { error: groupError } = await supabase.from('groups').insert({
+                    // 2. Create Team entry with join code
+                    const { error: groupError } = await supabase.from('teams').insert({
                       name: formData.team,
                       join_code: joinCode
                     });
 
                     if (groupError) {
-                      console.error("Error creating group:", groupError);
-                      // Optionally alert or handle, but we shouldn't block signup if this fails, 
-                      // though it's critical for the bot. For now, we log and proceed.
+                      console.error("Error creating team:", groupError);
+                      // Log and proceed — team creation is important but shouldn't block signup
                     }
 
                     // Generate the WhatsApp Link
@@ -457,8 +456,8 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
                     setHasCopiedLink(true);
                   }}
                   className={`w-full py-3 rounded-lg text-sm font-bold transition-all ${hasCopiedLink
-                      ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                      : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
                     }`}
                 >
                   {hasCopiedLink ? 'Copied to Clipboard!' : 'Copy Join Link'}

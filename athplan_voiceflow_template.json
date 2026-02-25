@@ -54,7 +54,7 @@
                         "Content-Type": "application/json"
                     },
                     "body": {
-                        "group": "{group_name}",
+                        "team": "{team_name}",
                         "content": "{schedule_content}",
                         "sender": "{user_id}"
                     }
@@ -86,7 +86,7 @@
         ],
         "variables": [
             "schedule_content",
-            "group_name",
+            "team_name",
             "user_id"
         ],
         "intents": [

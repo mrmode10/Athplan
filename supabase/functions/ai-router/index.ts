@@ -102,9 +102,9 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         // 3. User Context & Schedule Retrieval
-        // Fetch user's group to provide relevant schedule updates
+        // Fetch user's team to provide relevant schedule updates
         const { data: userData, error: userError } = await supabase
-            .from('bot_users')
+            .from('whatsapp_users')
             .select('group_name, phone_number')
             .eq('phone_number', user_id) // Assuming user_id is phone number
             .single();

@@ -51,7 +51,7 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
         if (!teamName) return;
         try {
             const { data, error } = await supabase
-                .from('groups')
+                .from('teams')
                 .select('join_code')
                 .eq('name', teamName)
                 .single();
@@ -334,6 +334,77 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
                     </div>
                 </div>
 
+                {/* Add Team Member */}
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700 mt-6">
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Add Team Member</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                        Add a player by phone number. They'll appear in your Team Roster and can chat with the AI bot.
+                    </p>
+
+                    <div className="flex gap-3 mb-4">
+                        <input
+                            type="tel"
+                            placeholder="+1234567890"
+                            className="flex-1 min-w-0 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            id="addMemberPhone"
+                        />
+                        <Button
+                            onClick={async () => {
+                                const input = document.getElementById('addMemberPhone') as HTMLInputElement;
+                                const phone = input.value.trim();
+                                if (!phone) return alert("Please enter a phone number");
+
+                                let currentTeam = teamName;
+                                if (!currentTeam) {
+                                    const { data: { user } } = await supabase.auth.getUser();
+                                    currentTeam = user?.user_metadata?.team || '';
+                                }
+                                if (!currentTeam) return alert("Please set your team name first.");
+
+                                try {
+                                    const { error } = await supabase
+                                        .from('whatsapp_users')
+                                        .upsert({
+                                            phone_number: phone,
+                                            group_name: currentTeam,
+                                            is_admin: false
+                                        }, { onConflict: 'phone_number' });
+
+                                    if (error) throw error;
+                                    alert(`✅ ${phone} added to ${currentTeam}!`);
+                                    input.value = '';
+                                } catch (e: any) {
+                                    console.error(e);
+                                    alert("Failed to add member: " + e.message);
+                                }
+                            }}
+                            className="whitespace-nowrap flex-shrink-0 px-4"
+                        >
+                            Add Member
+                        </Button>
+                    </div>
+
+                    {joinLink && (
+                        <div className="bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+                            <p className="text-xs text-slate-500 mb-1.5">Or share this link so players can join themselves:</p>
+                            <div className="flex items-center gap-2">
+                                <code className="text-xs text-indigo-400 truncate flex-1">{joinLink}</code>
+                                <button
+                                    onClick={() => {
+                                        if (joinLink) {
+                                            navigator.clipboard.writeText(joinLink);
+                                            alert('Join link copied!');
+                                        }
+                                    }}
+                                    className="text-xs text-indigo-400 hover:text-indigo-300 font-medium whitespace-nowrap"
+                                >
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
                 {/* Update Team Name */}
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700 mt-6">
                     <h4 className="font-bold text-slate-900 dark:text-white mb-2">Team Name</h4>
@@ -361,7 +432,7 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
                                         const teamSlug = newName.replace(/\s+/g, '').slice(0, 10);
                                         const randomSuffix = Math.floor(1000 + Math.random() * 9000);
                                         const joinCode = `${teamSlug}-${randomSuffix}`;
-                                        const { error: insertError } = await supabase.from('groups').insert({
+                                        const { error: insertError } = await supabase.from('teams').insert({
                                             name: newName,
                                             join_code: joinCode
                                         });

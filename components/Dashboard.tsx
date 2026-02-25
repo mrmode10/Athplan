@@ -65,7 +65,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
       try {
         // Fetch admin phone numbers for this team
         const { data: admins } = await supabase
-          .from('bot_users')
+          .from('whatsapp_users')
           .select('phone_number')
           .eq('group_name', user.team)
           .eq('is_admin', true);
@@ -96,7 +96,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
     const fetchJoinLink = async () => {
       if (!user?.team) return;
       try {
-        const { data, error } = await supabase.from('groups').select('join_code').eq('name', user.team).single();
+        const { data, error } = await supabase.from('teams').select('join_code').eq('name', user.team).single();
         if (data?.join_code) {
           const encodedMessage = encodeURIComponent(`Join ${data.join_code}`);
           setJoinLink(`https://wa.me/${MY_NUMBER}?text=${encodedMessage}`);
