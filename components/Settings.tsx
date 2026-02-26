@@ -363,7 +363,7 @@ const Settings: React.FC<SettingsProps> = ({ teamName }) => {
 
                                 try {
                                     const { error } = await supabase
-                                        .from('whatsapp_users')
+                                        .from('bot_users')
                                         .upsert({
                                             phone_number: phone,
                                             group_name: currentTeam,

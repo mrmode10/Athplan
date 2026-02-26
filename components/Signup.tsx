@@ -410,14 +410,37 @@ const Signup: React.FC<SignupProps> = ({ onBack, onLogin, onSuccess, selectedPla
                       // Log and proceed — team creation is important but shouldn't block signup
                     }
 
+                    // 2b. Ensure public.users row exists (belt-and-suspenders with trigger)
+                    // Fetch the team_id for linking
+                    let teamId = null;
+                    const { data: teamData } = await supabase
+                      .from('teams')
+                      .select('id')
+                      .eq('name', formData.team)
+                      .single();
+                    if (teamData) teamId = teamData.id;
+
+                    const { error: userError } = await supabase
+                      .from('users')
+                      .upsert({
+                        id: user.id,
+                        email: user.email,
+                        full_name: `${formData.firstName} ${formData.lastName}`,
+                        team_id: teamId,
+                        subscription_status: 'trialing'
+                      }, { onConflict: 'id' });
+
+                    if (userError) {
+                      console.error("Error creating user profile:", userError);
+                    }
+
                     // Generate the WhatsApp Link
                     const message = `Join ${joinCode}`;
                     const encodedMessage = encodeURIComponent(message);
                     setGeneratedJoinLink(`https://wa.me/${MY_NUMBER}?text=${encodedMessage}`);
 
-                    // 3. Update User
+                    // 3. Update User subscription status (already upserted above, this is a safety net)
                     await supabase.from('users').update({
-                      plan: selectedPlan,
                       subscription_status: 'trialing'
                     }).eq('id', user.id);
 

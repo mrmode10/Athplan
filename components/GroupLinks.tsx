@@ -41,14 +41,14 @@ const GroupLinks: React.FC<GroupLinksProps> = ({ teamName }) => {
                 setJoinCode(teamData.join_code);
             }
 
-            // Fetch all whatsapp_users for this team
+            // Fetch all bot_users for this team
             const { data: memberData, error: memberErr } = await supabase
-                .from('whatsapp_users')
-                .select('phone_number, group_name, is_admin, name')
+                .from('bot_users')
+                .select('phone_number, group_name, is_admin')
                 .eq('group_name', teamName);
 
             if (memberErr) throw memberErr;
-            setMembers(memberData || []);
+            setMembers((memberData || []).map(m => ({ ...m, name: null })));
         } catch (err: any) {
             console.error('Error loading team data:', err);
             setError('Failed to load team data');
@@ -62,7 +62,7 @@ const GroupLinks: React.FC<GroupLinksProps> = ({ teamName }) => {
         setRemovingPhone(phone);
         try {
             const { error } = await supabase
-                .from('whatsapp_users')
+                .from('bot_users')
                 .delete()
                 .eq('phone_number', phone)
                 .eq('group_name', teamName);

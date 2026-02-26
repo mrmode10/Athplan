@@ -63,9 +63,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
     const fetchAdminAndFiles = async () => {
       if (!user?.team) return;
       try {
-        // Fetch admin phone numbers for this team
+        // Fetch admin phone numbers for this team from bot_users (where add_team_admin writes)
         const { data: admins } = await supabase
-          .from('whatsapp_users')
+          .from('bot_users')
           .select('phone_number')
           .eq('group_name', user.team)
           .eq('is_admin', true);
@@ -155,13 +155,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
         .limit(10);
 
       if (data) {
-        // Map DB columns to UI shape if needed or ensure they match
+        // Map DB columns (action, details, created_at) to UI shape
         setActivityLog(data.map(log => ({
           id: log.id,
           time: new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          user: log.user_name || 'User',
-          query: log.query,
-          status: log.status
+          user: log.details?.user_name || 'User',
+          query: log.action || log.details?.query || '',
+          status: log.details?.status || 'Processed'
         })));
       }
     } catch (e) {

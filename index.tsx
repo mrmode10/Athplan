@@ -23,7 +23,7 @@ const PaymentController = () => {
         };
     }, []);
 
-    return <PaymentModal isOpen={isOpen} onClose={() => setIsOpen(false)} />;
+    return <PaymentModal isOpen={isOpen} onClose={() => setIsOpen(false)} plan="Starter" />;
 };
 
 const rootEl = document.getElementById('root');
