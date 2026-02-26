@@ -139,12 +139,37 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
       setActivityLog(DEMO_LOGS);
       setStats({ queries: 24, activePlayers: 18, timeSaved: 1.5 });
     } else if (setupMode === 'blank') {
-      // Mock stats for blank
-      setStats({ queries: 0, activePlayers: 0, timeSaved: 0 });
-      // Fetch real logs
+      // Fetch real logs and calculate stats
       fetchActivityLogs();
+      const calculateStats = async () => {
+        if (!user?.team) return;
+        try {
+          // Count active players (bot_users who are not admins)
+          const { count: playersCount } = await supabase
+            .from('bot_users')
+            .select('*', { count: 'exact', head: true })
+            .eq('group_name', user.team)
+            .eq('is_admin', false);
+
+          // Get total queries from activity_logs
+          const { count: queriesCount } = await supabase
+            .from('activity_logs')
+            .select('*', { count: 'exact', head: true });
+
+          const totalQueries = queriesCount || 0;
+
+          setStats({
+            queries: totalQueries,
+            activePlayers: playersCount || 0,
+            timeSaved: Math.round((totalQueries * 2.5) / 60 * 10) / 10 // Assumption: 2.5 mins saved per query
+          });
+        } catch (e) {
+          console.error("Failed to calculate stats", e);
+        }
+      };
+      calculateStats();
     }
-  }, [setupMode]);
+  }, [setupMode, user?.team]);
 
   const fetchActivityLogs = async () => {
     try {
