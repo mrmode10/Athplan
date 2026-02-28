@@ -29,9 +29,16 @@ serve(async (req) => {
         const { email, user_id, voiceflow_user_id, plan } = await req.json()
 
         // Map plan to amount (in cents)
-        let amount = 9900; // Starter
-        if (plan === 'All Star') amount = 19900;
-        if (plan === 'Hall of Fame') amount = 24900;
+        const isAnnual = plan?.endsWith(' (Annual)') || false;
+        const basePlan = isAnnual ? plan.replace(' (Annual)', '') : plan;
+
+        // Base monthly rates
+        let baseAmount = 9900; // Starter
+        if (basePlan === 'All Star') baseAmount = 19900;
+        if (basePlan === 'Hall of Fame') baseAmount = 24900;
+
+        // Apply discount and interval multiplier if annual
+        const finalAmount = isAnnual ? Math.round(baseAmount * 0.8 * 12) : baseAmount;
 
         // 1. Create Customer
         const customer = await stripe.customers.create({
@@ -51,9 +58,9 @@ serve(async (req) => {
                     product_data: {
                         name: plan || 'Starter Pack',
                     },
-                    unit_amount: amount,
+                    unit_amount: finalAmount,
                     recurring: {
-                        interval: 'month',
+                        interval: isAnnual ? 'year' : 'month',
                     },
                 },
             }],

@@ -97,7 +97,15 @@ serve(async (req) => {
                 throw new Error('No active subscription to update')
             }
 
-            const newPlanDetails = getPlanDetails(plan)
+            const isAnnual = plan.endsWith(' (Annual)')
+            const basePlanName = isAnnual ? plan.replace(' (Annual)', '') : plan
+            const newPlanDetails = getPlanDetails(basePlanName)
+
+            // Calculate amount based on interval (20% discount for annual)
+            let amount = newPlanDetails.amount
+            if (isAnnual) {
+                amount = Math.round(amount * 0.8 * 12)
+            }
 
             // Proration behavior: always_invoice to charge immediately for upgrades? 
             // Or create_prorations defaults to true.
@@ -107,8 +115,8 @@ serve(async (req) => {
                     price_data: {
                         currency: 'usd',
                         product_data: { name: plan },
-                        unit_amount: newPlanDetails.amount,
-                        recurring: { interval: 'month' }
+                        unit_amount: amount,
+                        recurring: { interval: isAnnual ? 'year' : 'month' }
                     }
                 }],
                 metadata: { plan: plan }

@@ -8,11 +8,24 @@ interface PricingProps {
 }
 
 const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
+  const [isAnnual, setIsAnnual] = React.useState(false);
+
+  // Base monthly amounts
+  const starterBase = 99;
+  const allStarBase = 199;
+  const hallOfFameBase = 249;
+
+  // Calculate prices based on toggle (20% discount for annual)
+  const calculatePrice = (base: number) => {
+    return isAnnual ? Math.round(base * 0.8) : base;
+  };
+
   const tiers = [
     {
       name: 'Starter Pack',
-      price: '€99',
+      price: `€${calculatePrice(starterBase)}`,
       period: '/month',
+      annualTotal: `Billed annually at €${calculatePrice(starterBase) * 12}`,
       description: 'Perfect for small coaching staffs and leadership groups.',
       features: [
         'Up to 8 Users',
@@ -25,8 +38,9 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
     },
     {
       name: 'All Star',
-      price: '€199',
+      price: `€${calculatePrice(allStarBase)}`,
       period: '/month',
+      annualTotal: `Billed annually at €${calculatePrice(allStarBase) * 12}`,
       description: 'The standard for competitive high school and college teams.',
       features: [
         'Up to 20 Users',
@@ -39,8 +53,9 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
     },
     {
       name: 'Hall of Fame',
-      price: '€249',
+      price: `€${calculatePrice(hallOfFameBase)}`,
       period: '/month',
+      annualTotal: `Billed annually at €${calculatePrice(hallOfFameBase) * 12}`,
       description: 'Maximum power for large squads requiring constant uptime.',
       features: [
         'Up to 30 Users',
@@ -53,13 +68,38 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
     }
   ];
 
+  const handleSignup = (tierName: string) => {
+    const planName = isAnnual ? `${tierName} (Annual)` : tierName;
+    onSignup(planName);
+  };
+
   return (
     <section id="pricing" className="py-24 px-6 w-full max-w-7xl mx-auto relative">
-      <div className="text-center mb-12">
+      <div className="text-center mb-8">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
         <p className="text-slate-400 max-w-xl mx-auto">
           Choose the plan that fits your team size. No hidden fees. Pause anytime in the off-season.
         </p>
+      </div>
+
+      {/* Annual Toggle */}
+      <div className="flex items-center justify-center gap-4 mb-8">
+        <span className={`text-sm ${!isAnnual ? 'text-white font-medium' : 'text-slate-400'}`}>Monthly</span>
+        <button
+          onClick={() => setIsAnnual(!isAnnual)}
+          className="relative inline-flex h-7 w-14 items-center rounded-full bg-slate-800 border border-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+        >
+          <span
+            className={`inline-block h-5 w-5 transform rounded-full bg-indigo-500 transition-transform ${isAnnual ? 'translate-x-8' : 'translate-x-1'
+              }`}
+          />
+        </button>
+        <span className={`text-sm flex items-center gap-1.5 ${isAnnual ? 'text-white font-medium' : 'text-slate-400'}`}>
+          Annually
+          <span className="bg-indigo-500/20 text-indigo-300 text-xs px-2 py-0.5 rounded-full border border-indigo-500/30">
+            Save 20%
+          </span>
+        </span>
       </div>
 
       <div className="bg-indigo-900/20 border border-indigo-500/30 rounded-full py-2 px-6 mb-16 max-w-max mx-auto flex items-center gap-2 animate-fade-in">
@@ -87,8 +127,13 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
             <div className="mb-6">
               <h3 className="text-lg font-medium text-white mb-2">{tier.name}</h3>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">{tier.price}</span>
+                <span className="text-4xl font-bold text-white transition-all duration-300">{tier.price}</span>
                 <span className="text-slate-500">{tier.period}</span>
+              </div>
+              <div className="h-4 mt-1">
+                {isAnnual && (
+                  <p className="text-xs text-indigo-400 font-medium animate-fade-in">{tier.annualTotal}</p>
+                )}
               </div>
               <p className="text-sm text-slate-400 mt-4 leading-relaxed">{tier.description}</p>
             </div>
@@ -105,7 +150,7 @@ const Pricing: React.FC<PricingProps> = ({ onSignup }) => {
             <Button
               variant={tier.highlight ? 'primary' : 'outline'}
               className="w-full"
-              onClick={() => onSignup(tier.name)}
+              onClick={() => handleSignup(tier.name)}
             >
               Start 14-Day Free Trial
             </Button>
