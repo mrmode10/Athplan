@@ -1,10 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Button from './Button';
-import { AthplanLogo, BotIcon, MessageCircleIcon, SmartphoneIcon, ZapIcon, CheckIcon, XIcon, ArrowRightIcon } from './icons/Icons';
+import { AthplanLogo, BotIcon, MessageCircleIcon, SmartphoneIcon, ZapIcon, CheckIcon, XIcon, ArrowRightIcon, UsersIcon } from './icons/Icons';
 import { User } from '../lib/mockBackend';
 import GroupLinks from './GroupLinks';
 import Settings from './Settings';
+import TeamManagement from './TeamManagement';
 import KnowledgeUploader from './KnowledgeUploader';
 import { supabase } from '../lib/supabase';
 
@@ -14,7 +15,7 @@ interface DashboardProps {
   onHome: () => void;
 }
 
-type Tab = 'overview' | 'inbox' | 'team' | 'settings';
+type Tab = 'overview' | 'inbox' | 'team' | 'settings' | 'team_management';
 type SetupMode = 'undecided' | 'demo' | 'blank';
 
 interface ActivityLog {
@@ -199,7 +200,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
     { id: 'inbox', label: 'Inbox', icon: MessageCircleIcon },
     { id: 'team', label: 'Team Roster', icon: SmartphoneIcon },
     { id: 'settings', label: 'Settings', icon: ZapIcon },
-  ];
+    { id: 'team_management', label: 'Team Management', icon: UsersIcon },
+  ] as const;
 
   // --- Handlers ---
 
@@ -575,6 +577,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
 
           {activeTab === 'settings' && (
             <Settings teamName={user.team} />
+          )}
+
+          {activeTab === 'team_management' && (
+            <TeamManagement teamName={user.team} />
           )}
 
           {/* Placeholder for other tabs (Inbox) */}
