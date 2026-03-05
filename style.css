@@ -34,6 +34,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -44,6 +45,7 @@ body {
     0% {
         opacity: 0;
     }
+
     100% {
         opacity: 1;
     }
@@ -58,9 +60,17 @@ body {
     animation: fade-in 1s ease-out forwards;
 }
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
+.delay-100 {
+    animation-delay: 100ms;
+}
+
+.delay-200 {
+    animation-delay: 200ms;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
+}
 
 /* Scroll Trigger Utility */
 .transition-element {
@@ -96,6 +106,7 @@ label:has(input[type="radio"]:checked) {
 /* Range Input Styling */
 input[type=range] {
     -webkit-appearance: none;
+    appearance: none;
     background: transparent;
 }
 
