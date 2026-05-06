@@ -7,6 +7,7 @@ import GroupLinks from './GroupLinks';
 import Settings from './Settings';
 import TeamManagement from './TeamManagement';
 import KnowledgeUploader from './KnowledgeUploader';
+import AdminDataTable from './AdminDataTable';
 import { supabase } from '../lib/supabase';
 
 interface DashboardProps {
@@ -15,7 +16,7 @@ interface DashboardProps {
   onHome: () => void;
 }
 
-type Tab = 'overview' | 'inbox' | 'team' | 'settings' | 'team_management';
+type Tab = 'overview' | 'inbox' | 'team' | 'settings' | 'team_management' | 'data_manager';
 type SetupMode = 'undecided' | 'demo' | 'blank';
 
 interface ActivityLog {
@@ -60,6 +61,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
   const [adminNumbers, setAdminNumbers] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string; created_at: string }[]>([]);
 
+  // Superadmin State
+  const [totalPlatformUsers, setTotalPlatformUsers] = useState<number | null>(null);
+
   useEffect(() => {
     const fetchAdminAndFiles = async () => {
       if (!user?.team) return;
@@ -87,7 +91,18 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
       } catch (e) { console.error(e); }
     };
     fetchAdminAndFiles();
-  }, [user?.team]);
+
+    // Fetch superadmin count if applicable
+    const fetchSuperadminData = async () => {
+      if (user?.email === 'mkumpys@gmail.com' || (user as any).is_superadmin) {
+        try {
+          const { data, error } = await supabase.rpc('get_total_system_users');
+          if (data !== null && !error) setTotalPlatformUsers(data);
+        } catch (e) { console.error('Error fetching total system users:', e); }
+      }
+    };
+    fetchSuperadminData();
+  }, [user?.team, user]);
 
   // WhatsApp Link State
   const [joinLink, setJoinLink] = useState<string | null>(null);
@@ -195,12 +210,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
     }
   };
 
+  const isSuperAdmin = user.email === 'mkumpys@gmail.com' || (user as any).is_superadmin;
+
   const navItems = [
     { id: 'overview', label: 'Overview', icon: BotIcon },
     { id: 'inbox', label: 'Inbox', icon: MessageCircleIcon },
     { id: 'team', label: 'Team Roster', icon: SmartphoneIcon },
     { id: 'settings', label: 'Settings', icon: ZapIcon },
     { id: 'team_management', label: 'Team Management', icon: UsersIcon },
+    ...(isSuperAdmin ? [{ id: 'data_manager' as const, label: 'Data Manager', icon: ZapIcon }] : []),
   ] as const;
 
   // --- Handlers ---
@@ -433,6 +451,22 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
             <>
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                {/* SUPERADMIN VIEW */}
+                {(user.email === 'mkumpys@gmail.com' || (user as any).is_superadmin) && totalPlatformUsers !== null && (
+                  <div className="bg-indigo-600 border border-indigo-500 p-6 rounded-2xl shadow-lg relative overflow-hidden transition-colors duration-300 md:col-span-3">
+                    <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 pointer-events-none"></div>
+                    <div className="text-indigo-100 text-sm font-semibold mb-2 uppercase tracking-wide">Athplan Superadmin Platform Stats</div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <div className="text-4xl font-black text-white">{totalPlatformUsers}</div>
+                        <div className="text-sm text-indigo-200 mt-1">Total Users Across All Teams</div>
+                      </div>
+                      <UsersIcon className="w-12 h-12 text-indigo-300/50" />
+                    </div>
+                  </div>
+                )}
+
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl transition-colors duration-300">
                   <div className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-2">Queries Today</div>
                   <div className="text-3xl font-bold text-slate-900 dark:text-white">{stats.queries}</div>
@@ -581,6 +615,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onHome }) => {
 
           {activeTab === 'team_management' && (
             <TeamManagement teamName={user.team} />
+          )}
+
+          {activeTab === 'data_manager' && isSuperAdmin && (
+            <AdminDataTable />
           )}
 
           {/* Placeholder for other tabs (Inbox) */}

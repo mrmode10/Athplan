@@ -81,7 +81,7 @@ const KnowledgeUploader: React.FC<KnowledgeUploaderProps> = ({ teamName }) => {
 
             <h4 className="font-bold text-slate-900 dark:text-white mb-2 relative z-10">AI Knowledge Base</h4>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 relative z-10 max-w-xl">
-                Upload your team's playbook, rules, schedules, or any document. The Athplan AI will read it and use it to answer questions from your players on WhatsApp.
+                Upload your team's playbook, rules, schedules, images, or any document. The Athplan AI will read it and use it to answer questions from your players on WhatsApp.
             </p>
 
             <div
@@ -95,18 +95,26 @@ const KnowledgeUploader: React.FC<KnowledgeUploaderProps> = ({ teamName }) => {
                     className="hidden"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.txt,.csv,.md,.xlsx,.xls,.pages,.numbers,.key,.rtf,.json"
+                    accept=".pdf,.doc,.docx,.txt,.csv,.md,.xlsx,.xls,.pages,.numbers,.key,.rtf,.json,.png,.jpg,.jpeg,.gif,.webp"
                 />
 
                 {file ? (
                     <div className="flex flex-col items-center justify-center">
-                        <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mb-3">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
+                        {file.type.startsWith('image/') ? (
+                            <img
+                                src={URL.createObjectURL(file)}
+                                alt="Preview"
+                                className="w-20 h-20 object-cover rounded-lg border-2 border-indigo-400/50 mb-3 shadow-lg"
+                            />
+                        ) : (
+                            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mb-3">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                        )}
                         <p className="font-medium text-slate-900 dark:text-white">{file.name}</p>
-                        <p className="text-xs text-slate-500 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <p className="text-xs text-slate-500 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB{file.type.startsWith('image/') ? ' • Image (OCR will extract text)' : ''}</p>
                         <button
                             onClick={(e) => { e.stopPropagation(); setFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; setMessage(null); }}
                             className="mt-3 text-xs text-red-500 hover:text-red-600 font-medium"
@@ -122,7 +130,7 @@ const KnowledgeUploader: React.FC<KnowledgeUploaderProps> = ({ teamName }) => {
                             </svg>
                         </div>
                         <p className="font-medium text-slate-900 dark:text-white">Click to upload or drag and drop</p>
-                        <p className="text-xs text-slate-500 mt-1">PDF, Word, Excel, Pages, Numbers, CSV, TXT, RTF up to 10MB</p>
+                        <p className="text-xs text-slate-500 mt-1">PDF, Word, Excel, Pages, Numbers, CSV, TXT, RTF, Images (PNG, JPG) up to 10MB</p>
                     </div>
                 )}
             </div>
